@@ -168,8 +168,8 @@ class CertificatesAdmin {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="certificate-manager-certificates-' . gmdate( 'Y-m-d-His' ) . '.csv"' );
 		header( 'X-Content-Type-Options: nosniff' );
-		$output = fopen( 'php://output', 'w' );
-		fwrite( $output, "\xEF\xBB\xBF" );
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output required for streaming CSV.
+		fwrite( $output, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Used for BOM on php://output stream.
 		fputcsv( $output, $headers );
 
 		foreach ( $certificates as $certificate ) {
@@ -186,7 +186,7 @@ class CertificatesAdmin {
 			fputcsv( $output, $row );
 		}
 
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing php://output stream.
 		exit;
 	}
 
@@ -205,10 +205,10 @@ class CertificatesAdmin {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $template['title'] . '-certificate-import.csv' ) . '"' );
 		header( 'X-Content-Type-Options: nosniff' );
-		$output = fopen( 'php://output', 'w' );
-		fwrite( $output, "\xEF\xBB\xBF" );
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output required for streaming CSV.
+		fwrite( $output, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Used for BOM on php://output stream.
 		fputcsv( $output, $this->get_template_csv_headers( $template ) );
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing php://output stream.
 		exit;
 	}
 
@@ -217,7 +217,7 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 
@@ -226,19 +226,20 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Choose a published template.', 'certificate-manager' ) ), 400 );
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Individual fields sanitized below before use.
 		$file = $_FILES['csv_file'] ?? array();
-		if ( empty( $file ) || UPLOAD_ERR_OK !== (int) ( $file['error'] ?? UPLOAD_ERR_NO_FILE ) || empty( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) {
+		if ( empty( $file ) || UPLOAD_ERR_OK !== (int) ( $file['error'] ?? UPLOAD_ERR_NO_FILE ) || empty( $file['tmp_name'] ) || ! is_uploaded_file( sanitize_text_field( wp_unslash( (string) $file['tmp_name'] ) ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Choose a valid CSV file to import.', 'certificate-manager' ) ), 400 );
 		}
 		if ( strtolower( pathinfo( (string) ( $file['name'] ?? '' ), PATHINFO_EXTENSION ) ) !== 'csv' || (int) ( $file['size'] ?? 0 ) > 5 * MB_IN_BYTES ) {
 			wp_send_json_error( array( 'message' => __( 'Upload a CSV file smaller than 5 MB.', 'certificate-manager' ) ), 400 );
 		}
 
-		$handle = fopen( $file['tmp_name'], 'r' );
+		$handle = fopen( $file['tmp_name'], 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reading uploaded tmp file, WP_Filesystem not suitable.
 		$header_row = $handle ? fgetcsv( $handle ) : false;
 		if ( ! $handle || ! is_array( $header_row ) ) {
 			if ( $handle ) {
-				fclose( $handle );
+				fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing uploaded tmp file handle.
 			}
 			wp_send_json_error( array( 'message' => __( 'The CSV must begin with a header row.', 'certificate-manager' ) ), 400 );
 		}
@@ -252,12 +253,13 @@ class CertificatesAdmin {
 		}
 		$template_fields = $this->get_template_csv_fields( $template );
 		if ( ! isset( $headers['recipient_name'] ) ) {
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing uploaded tmp file handle.
 			wp_send_json_error( array( 'message' => __( 'The CSV must include a recipient_name column.', 'certificate-manager' ) ), 400 );
 		}
 		foreach ( $template_fields as $field ) {
 			if ( ! empty( $field['required'] ) && ! isset( $headers[ $field['key'] ] ) ) {
-				fclose( $handle );
+				fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing uploaded tmp file handle.
+				/* translators: %s: CSV column key name */
 				wp_send_json_error( array( 'message' => sprintf( __( 'The CSV must include the required %s column.', 'certificate-manager' ), $field['key'] ) ), 400 );
 			}
 		}
@@ -300,13 +302,14 @@ class CertificatesAdmin {
 					if ( ! empty( $error_data['errors'] ) && is_array( $error_data['errors'] ) ) {
 						$message .= ': ' . implode( ', ', $error_data['errors'] );
 					}
-					$results['errors'][] = sprintf( __( 'Row %d: %s', 'certificate-manager' ), $row_number, $message );
+					/* translators: 1: row number, 2: error message */
+					$results['errors'][] = sprintf( __( 'Row %1$d: %2$s', 'certificate-manager' ), $row_number, $message );
 				}
 			} else {
 				$results['issued']++;
 			}
 		}
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing uploaded tmp file handle.
 		if ( 0 === $results['total'] ) {
 			wp_send_json_error( array( 'message' => __( 'The CSV does not contain any certificate rows.', 'certificate-manager' ) ), 400 );
 		}
@@ -350,13 +353,13 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
 		$template_id = absint( $_POST['template_id'] ?? $this->settings->get( 'default_template_id', 0 ) );
-		$recipient_name = sanitize_text_field( $_POST['recipient_name'] ?? '' );
-		$recipient_email = sanitize_email( $_POST['recipient_email'] ?? '' );
+		$recipient_name = sanitize_text_field( wp_unslash( $_POST['recipient_name'] ?? '' ) );
+		$recipient_email = sanitize_email( wp_unslash( $_POST['recipient_email'] ?? '' ) );
 		$variables = array();
 		if ( isset( $_POST['variables'] ) && is_array( $_POST['variables'] ) ) {
 			foreach ( wp_unslash( $_POST['variables'] ) as $key => $value ) {
@@ -365,7 +368,7 @@ class CertificatesAdmin {
 				}
 			}
 		}
-		$issue_date = sanitize_text_field( $_POST['issue_date'] ?? '' );
+		$issue_date = sanitize_text_field( wp_unslash( $_POST['issue_date'] ?? '' ) );
 		$issue_data = array_merge( $variables, array(
 			'template_id' => $template_id,
 			'recipient_name' => $recipient_name,
@@ -373,7 +376,8 @@ class CertificatesAdmin {
 			'issue_date' => $issue_date ?: current_time( 'mysql' ),
 			'expiry_enabled' => ! empty( $_POST['expiry_enabled'] ),
 			'expiry_quantity' => max( 1, absint( $_POST['expiry_quantity'] ?? 1 ) ),
-			'expiry_unit' => in_array( $_POST['expiry_unit'] ?? '', array( 'days', 'months', 'years' ), true ) ? $_POST['expiry_unit'] : 'years',
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- sanitize_key and in_array whitelist applied.
+			'expiry_unit' => in_array( $_POST['expiry_unit'] ?? '', array( 'days', 'months', 'years' ), true ) ? sanitize_key( wp_unslash( $_POST['expiry_unit'] ) ) : 'years',
 		) );
 		$result = $this->issuance_service->issue_certificate( $issue_data );
 		
@@ -401,12 +405,12 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$certificate_id = intval( $_POST['certificate_id'] );
-		$reason = sanitize_textarea_field( $_POST['reason'] ?? '' );
+		$certificate_id = absint( $_POST['certificate_id'] ?? 0 );
+		$reason = sanitize_textarea_field( wp_unslash( $_POST['reason'] ?? '' ) );
 		
 		$result = $this->issuance_service->revoke_certificate( $certificate_id, $reason );
 
@@ -429,11 +433,11 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$certificate_id = intval( $_POST['certificate_id'] );
+		$certificate_id = absint( $_POST['certificate_id'] ?? 0 );
 		
 		$replacement_id = isset( $_POST['replacement_id'] ) ? intval( $_POST['replacement_id'] ) : 0;
 		if ( ! $replacement_id ) {
@@ -457,11 +461,11 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$certificate_id = intval( $_POST['certificate_id'] );
+		$certificate_id = absint( $_POST['certificate_id'] ?? 0 );
 		$certificate = $this->cert_repo->get_certificate( $certificate_id );
 		
 		if ( ! $certificate ) {
@@ -479,7 +483,7 @@ class CertificatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		$search = sanitize_text_field( $_GET['search'] ?? '' );
+		$search = sanitize_text_field( wp_unslash( $_GET['search'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Search term only, no state change.
 		
 		$users = get_users( array(
 			'search' => '*' . $search . '*',
@@ -651,7 +655,9 @@ class CertificatesAdmin {
 			<?php elseif ( 'image' === $type ) : ?>
 				<?php $image_options = is_array( $options ) ? array_values( array_filter( array_map( 'absint', $options ), 'wp_attachment_is_image' ) ) : array(); ?>
 				<?php if ( $image_options ) : ?>
-					<select name="variables[<?php echo esc_attr( $key ); ?>]" <?php echo $required ? 'required' : ''; ?>><option value=""><?php esc_html_e( 'Choose an approved image', 'certificate-manager' ); ?></option><?php foreach ( $image_options as $image_id ) : ?><option value="<?php echo esc_attr( $image_id ); ?>" <?php selected( absint( $variable['default_value'] ?? 0 ), $image_id ); ?>><?php echo esc_html( get_the_title( $image_id ) ?: sprintf( __( 'Image %d', 'certificate-manager' ), $image_id ) ); ?></option><?php endforeach; ?></select>
+					<select name="variables[<?php echo esc_attr( $key ); ?>]" <?php echo $required ? 'required' : ''; ?>><option value=""><?php esc_html_e( 'Choose an approved image', 'certificate-manager' ); ?></option><?php foreach ( $image_options as $image_id ) : ?><option value="<?php echo esc_attr( $image_id ); ?>" <?php selected( absint( $variable['default_value'] ?? 0 ), $image_id ); ?>><?php
+					/* translators: %d: media attachment ID */
+					echo esc_html( get_the_title( $image_id ) ?: sprintf( __( 'Image %d', 'certificate-manager' ), $image_id ) ); ?></option><?php endforeach; ?></select>
 				<?php else : ?>
 					<input type="hidden" class="cm-image-variable-input" name="variables[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( absint( $variable['default_value'] ?? 0 ) ); ?>" data-required="<?php echo $required ? '1' : '0'; ?>">
 					<button type="button" class="button cm-select-variable-media"><?php esc_html_e( 'Choose image', 'certificate-manager' ); ?></button>
@@ -690,9 +696,12 @@ class CertificatesAdmin {
 	 */
 	private function render_certificate_list() {
 		$this->cert_repo->expire_due_certificates();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter/search params, no state change.
 		$search = sanitize_text_field( wp_unslash( $_GET['cm_search'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter param, no state change.
 		$filter = sanitize_key( wp_unslash( $_GET['cm_status'] ?? 'all' ) );
 		$filter = in_array( $filter, array( 'all', 'expiring', 'expired', 'revoked', 'replaced' ), true ) ? $filter : 'all';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only pagination param, no state change.
 		$current_page = max( 1, absint( wp_unslash( $_GET['cm_certificates_page'] ?? 1 ) ) );
 		$query_args = array( 'per_page' => 50, 'paged' => $current_page, 'search' => $search );
 		if ( 'expiring' === $filter ) {
@@ -750,14 +759,18 @@ class CertificatesAdmin {
 					<tr>
 						<td>#<?php echo esc_html( $cert['certificate_number'] ); ?></td>
 						<td><?php echo esc_html( $cert['recipient_name'] ); ?></td>
-						<td><?php echo esc_html( $cert['template_title'] ?: sprintf( __( 'Template #%d', 'certificate-manager' ), $cert['template_id'] ) ); ?></td>
+						<td><?php
+						/* translators: %d: template database ID */
+						echo esc_html( $cert['template_title'] ?: sprintf( __( 'Template #%d', 'certificate-manager' ), $cert['template_id'] ) ); ?></td>
 						<td>
 							<span class="cm-status cm-status-<?php echo esc_attr( $status ); ?>">
 								<?php echo esc_html( ucfirst( $status ) ); ?>
 							</span>
 						</td>
 						<td><?php echo esc_html( $cert['issue_date'] ?? $cert['created_at'] ); ?></td>
-						<td><span class="cm-expiry-state <?php echo esc_attr( $expiry_state['class'] ); ?>"><?php echo esc_html( $expiry_state['label'] ); ?></span><?php if ( $expiry_state['date'] ) : ?><span class="cm-expiry-date"><?php echo esc_html( sprintf( __( 'Expires %s', 'certificate-manager' ), $expiry_state['date'] ) ); ?></span><?php endif; ?></td>
+						<td><span class="cm-expiry-state <?php echo esc_attr( $expiry_state['class'] ); ?>"><?php echo esc_html( $expiry_state['label'] ); ?></span><?php if ( $expiry_state['date'] ) : ?><span class="cm-expiry-date"><?php
+						/* translators: %s: formatted expiry date */
+						echo esc_html( sprintf( __( 'Expires %s', 'certificate-manager' ), $expiry_state['date'] ) ); ?></span><?php endif; ?></td>
 						<td>
 							<details class="cm-certificate-actions">
 								<summary class="button<?php echo $is_active && $expiry_state['is_soon'] ? ' button-primary' : ''; ?>"><?php echo esc_html( $is_active && $expiry_state['is_soon'] ? __( 'Replace before expiry', 'certificate-manager' ) : __( 'Actions', 'certificate-manager' ) ); ?></summary>
@@ -801,6 +814,7 @@ class CertificatesAdmin {
 		$days_remaining = (int) ceil( $seconds_remaining / DAY_IN_SECONDS );
 		$renewal_window = max( 1, (int) $this->settings->get( 'expiry_renewal_notice_days', 30 ) );
 		return array(
+			/* translators: %d: number of days remaining until expiry */
 			'label' => sprintf( _n( '%d day left', '%d days left', $days_remaining, 'certificate-manager' ), $days_remaining ),
 			'date' => wp_date( get_option( 'date_format' ), $expiry->getTimestamp() ),
 			'class' => $days_remaining <= $renewal_window ? 'is-soon' : 'is-active',

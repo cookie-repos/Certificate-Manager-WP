@@ -802,7 +802,7 @@ class RESTController {
 			}
 		}
 		
-		$body = var_export( $example_data, true );
+		$body = wp_json_encode( $example_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		
 		return "\$client = new GuzzleHttp\Client();\n\n" .
 			"\\$response = \$client->post( '" . home_url( '/wp-json/certificate-manager/v1/certificates' ) . "', [\n" .
@@ -999,6 +999,7 @@ class RESTController {
 		foreach ( $template_vars as $var ) {
 			if ( $var['is_required'] && ( ! isset( $data[ $var['key'] ] ) || $data[ $var['key'] ] === '' ) ) {
 				$errors[] = sprintf(
+					/* translators: %s: field label */
 					__( '%s is required', 'certificate-manager' ),
 					$var['label']
 				);
@@ -1007,6 +1008,7 @@ class RESTController {
 			if ( isset( $data[ $var['key'] ] ) && $data[ $var['key'] ] !== '' ) {
 				if ( ! $this->validate_field_value( $data[ $var['key'] ], $var['field_type'] ) ) {
 					$errors[] = sprintf(
+						/* translators: %s: field label */
 						__( '%s is invalid', 'certificate-manager' ),
 						$var['label']
 					);

@@ -67,7 +67,7 @@ class Exporter {
 		}
 		
 		// Write CSV
-		$file = fopen( $file_path, 'w' );
+		$file = fopen( $file_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Writing temp CSV file.
 		if ( ! $file ) {
 			return false;
 		}
@@ -84,7 +84,7 @@ class Exporter {
 			fputcsv( $file, $row );
 		}
 		
-		fclose( $file );
+		fclose( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing temp CSV file.
 		
 		return true;
 	}
@@ -126,6 +126,7 @@ class Exporter {
 			$query .= $wpdb->prepare( " AND cm_certificates.created_at <= %s", $args['date_to'] );
 		}
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Dynamic query built from validated inputs; table names use WP prefix.
 		return $wpdb->get_results( $query, ARRAY_A );
 	}
 }

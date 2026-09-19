@@ -61,7 +61,7 @@ class Importer {
 			return $results;
 		}
 		
-		$file = fopen( $file_path, 'r' );
+		$file = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reading uploaded CSV file.
 		if ( ! $file ) {
 			$results['errors'][] = __( 'Could not open file', 'certificate-manager' );
 			return $results;
@@ -70,7 +70,7 @@ class Importer {
 		$header = fgetcsv( $file );
 		if ( ! $header ) {
 			$results['errors'][] = __( 'Invalid CSV format', 'certificate-manager' );
-			fclose( $file );
+			fclose( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing CSV file.
 			return $results;
 		}
 		
@@ -98,6 +98,7 @@ class Importer {
 			// Validate required fields
 			if ( empty( $cert_data['recipient_name'] ) || empty( $cert_data['recipient_email'] ) ) {
 				$results['failed']++;
+				/* translators: %d: CSV row number */
 				$results['errors'][] = sprintf( __( 'Row %d: Missing required fields', 'certificate-manager' ), $row_num );
 				continue;
 			}
@@ -121,13 +122,14 @@ class Importer {
 				$results['success']++;
 			} else {
 				$results['failed']++;
+				/* translators: %d: CSV row number */
 				$results['errors'][] = sprintf( __( 'Row %d: Failed to issue certificate', 'certificate-manager' ), $row_num );
 			}
 			
 			$results['total']++;
 		}
 		
-		fclose( $file );
+		fclose( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing CSV file.
 		
 		return $results;
 	}

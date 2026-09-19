@@ -149,7 +149,7 @@ class QRService {
 		// Create QR image resource
 		$qr_image = imagecreatefrompng( $qr_path );
 		if ( ! $qr_image ) {
-			unlink( $logo_file );
+			wp_delete_file( $logo_file );
 			return $qr_path;
 		}
 		
@@ -157,7 +157,7 @@ class QRService {
 		$logo_image = $this->create_image_from_file( $logo_file );
 		if ( ! $logo_image ) {
 			imagedestroy( $qr_image );
-			unlink( $logo_file );
+			wp_delete_file( $logo_file );
 			return $qr_path;
 		}
 		
@@ -200,7 +200,7 @@ class QRService {
 		// Cleanup
 		imagedestroy( $qr_image );
 		imagedestroy( $logo_image );
-		unlink( $logo_file );
+		wp_delete_file( $logo_file );
 		
 		return $qr_path;
 	}
@@ -250,6 +250,7 @@ class QRService {
 		if ( $data_length > $max_length ) {
 			$results['valid'] = false;
 			$results['errors'][] = sprintf(
+				/* translators: %d: maximum number of characters allowed in a QR code */
 				__( 'Data exceeds maximum QR code capacity (%d characters)', 'certificate-manager' ),
 				$max_length
 			);

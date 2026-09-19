@@ -38,7 +38,7 @@ if ( ! function_exists( 'esc_attr' ) ) {
 
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	function sanitize_text_field( $str ) {
-		return htmlspecialchars( strip_tags( $str ), ENT_QUOTES, 'UTF-8' );
+		return htmlspecialchars( wp_strip_all_tags( $str ), ENT_QUOTES, 'UTF-8' );
 	}
 }
 
@@ -56,7 +56,7 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 
 if ( ! function_exists( 'current_time' ) ) {
 	function current_time( $type, $gmt = false ) {
-		return date( 'Y-m-d H:i:s' );
+		return gmdate( 'Y-m-d H:i:s' );
 	}
 }
 
@@ -72,6 +72,7 @@ if ( ! function_exists( 'wp_generate_password' ) ) {
 
 if ( ! function_exists( 'wp_rand' ) ) {
 	function wp_rand( $min = 0, $max = 0 ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rand_mt_rand -- This is the wp_rand stub itself; mt_rand is the underlying implementation.
 		return mt_rand( $min ?: 0, $max ?: mt_getrandmax() );
 	}
 }

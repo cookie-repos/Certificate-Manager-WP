@@ -62,7 +62,7 @@ class CSVService {
 		$certificates = $this->get_certificates_for_export( $args );
 		
 		// Build CSV
-		$output = fopen( 'php://output', 'w' );
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output required for streaming CSV.
 		fputcsv( $output, $args['fields'] );
 		
 		foreach ( $certificates as $cert ) {
@@ -73,7 +73,7 @@ class CSVService {
 			fputcsv( $output, $row );
 		}
 		
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing php://output stream.
 	}
 	
 	/**
@@ -113,6 +113,7 @@ class CSVService {
 			$query .= $wpdb->prepare( " AND cm_certificates.created_at <= %s", $args['date_to'] );
 		}
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Dynamic query built from validated inputs; table names use WP prefix.
 		return $wpdb->get_results( $query, ARRAY_A );
 	}
 	
@@ -135,7 +136,7 @@ class CSVService {
 			return $results;
 		}
 		
-		$file = fopen( $file_path, 'r' );
+		$file = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reading CSV file for import.
 		if ( ! $file ) {
 			$results['errors'][] = __( 'Could not open file', 'certificate-manager' );
 			return $results;
@@ -144,7 +145,7 @@ class CSVService {
 		$header = fgetcsv( $file );
 		if ( ! $header ) {
 			$results['errors'][] = __( 'Invalid CSV format', 'certificate-manager' );
-			fclose( $file );
+			fclose( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing CSV file.
 			return $results;
 		}
 		
@@ -209,12 +210,12 @@ class CSVService {
 			array( 'Jane Smith', 'jane@example.com', json_encode( array( 'course_title' => 'Another Course' ) ) ),
 		);
 		
-		$output = fopen( 'php://output', 'w' );
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output required for streaming CSV.
 		
 		foreach ( $sample as $row ) {
 			fputcsv( $output, $row );
 		}
 		
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing php://output stream.
 	}
 }

@@ -56,12 +56,12 @@ class Controller {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
 		$template_id = intval( $_POST['template_id'] );
-		$variables = isset( $_POST['variables'] ) ? wp_kses_post_deep( $_POST['variables'] ) : array();
+		$variables = isset( $_POST['variables'] ) ? wp_kses_post_deep( wp_unslash( $_POST['variables'] ) ) : array();
 		
 		$preview_html = $this->designer_service->render_preview( $template_id, $variables );
 		

@@ -169,6 +169,7 @@ class VerificationService {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_certificates';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$wpdb->query( $wpdb->prepare(
 			"UPDATE {$table_name} SET verification_count = verification_count + 1 WHERE id = %d",
 			$certificate_id
@@ -269,7 +270,7 @@ class VerificationService {
 		$settings = new \CertificateManager\Core\Settings();
 		$lifetime = $settings->get( 'download_token_lifetime', 900 );
 		
-		$expires_at = date( 'Y-m-d H:i:s', time() + $lifetime );
+		$expires_at = gmdate( 'Y-m-d H:i:s', time() + $lifetime );
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_download_tokens';
 		$wpdb->insert( $table_name, array(
@@ -293,6 +294,7 @@ class VerificationService {
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_download_tokens';
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$token_data = $wpdb->get_row( $wpdb->prepare(
 			"SELECT * FROM {$table_name} WHERE token = %s AND expires_at > %s AND used = 0",
 			$token, current_time( 'mysql' )
@@ -376,6 +378,7 @@ class VerificationService {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_certificates';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$cert = $wpdb->get_row( $wpdb->prepare(
 			"SELECT id FROM {$table_name} WHERE verification_token LIKE %s LIMIT 1",
 			$wpdb->esc_like( $token ) . '%'

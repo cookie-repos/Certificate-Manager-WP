@@ -64,7 +64,7 @@ class LogsAdmin {
 	 * @param string $hook Current hook.
 	 */
 	public function enqueue_scripts( $hook ) {
-		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page check, no form data processed.
 		if ( 'cm_logs' !== $page ) {
 			return;
 		}
@@ -90,11 +90,11 @@ class LogsAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$logs_type = sanitize_text_field( $_POST['type'] ?? '' );
+		$logs_type = sanitize_text_field( wp_unslash( $_POST['type'] ?? '' ) );
 		
 		if ( 'audit' === $logs_type ) {
 			$this->audit_repo->clear();
@@ -203,6 +203,7 @@ class LogsAdmin {
 			return (string) ( $display_name ?: $username );
 		}
 
+		/* translators: %d: WordPress user ID */
 		return $user_id ? sprintf( __( 'Deleted user #%d', 'certificate-manager' ), $user_id ) : __( 'Unknown user', 'certificate-manager' );
 	}
 

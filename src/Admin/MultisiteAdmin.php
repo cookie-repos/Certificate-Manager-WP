@@ -110,7 +110,8 @@ class MultisiteAdmin {
 							$count = count( $template['sites'] );
 							echo esc_html( $count );
 							if ( $count > 5 ) {
-								echo ' ' . sprintf( __( '+ %d more', 'certificate-manager' ), $count - 5 );
+								/* translators: %d: number of additional sites beyond the 5 shown */
+								echo ' ' . esc_html( sprintf( __( '+ %d more', 'certificate-manager' ), $count - 5 ) );
 							}
 							?>
 						</td>

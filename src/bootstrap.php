@@ -191,6 +191,7 @@ class Bootstrap {
 			
 			// Delete all options
 			global $wpdb;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time uninstall cleanup, no caching needed.
 			$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'certificate_manager_%'" );
 		}
 	}
@@ -199,74 +200,46 @@ class Bootstrap {
 	 * Initialize plugin
 	 */
 	public function init() {
-		$log_file = WP_CONTENT_DIR . '/cm-activation-log.txt';
-		
-		cm_log( 'Bootstrap::init() - Starting', $log_file );
-		
-		// Load text domain
-		cm_log( 'Loading text domain...', $log_file );
-		try {
-			$this->load_textdomain();
-			cm_log( 'Text domain loaded', $log_file );
-		} catch ( \Throwable $e ) {
-			cm_log( 'Text domain error: ' . $e->getMessage(), $log_file );
-		}
-		
 		// Register post types and taxonomies
-		cm_log( 'Registering post types...', $log_file );
 		try {
 			$this->register_post_types();
-			cm_log( 'Post types registered', $log_file );
 		} catch ( \Throwable $e ) {
-			cm_log( 'Post types error: ' . $e->getMessage(), $log_file );
+			// Silently fail registration errors to avoid fatal errors on init
 		}
-		
+
 		// Include all classes
-		cm_log( 'Including files...', $log_file );
 		try {
 			$this->include_files();
-			cm_log( 'Files included', $log_file );
 		} catch ( \Throwable $e ) {
-			cm_log( 'Include files error: ' . $e->getMessage(), $log_file );
-			cm_log( 'File: ' . $e->getFile() . ':' . $e->getLine(), $log_file );
+			// Silently fail include errors
 		}
 
 		if ( (int) get_option( 'certificate_manager_schema_version', 0 ) < $this->schema_version ) {
 			$migration = new \CertificateManager\Database\MigrationManager( $this->version, $this->schema_version );
 			$migration->run_migrations();
 		}
-		
+
 		// Initialize components
-		cm_log( 'Initializing components...', $log_file );
 		try {
 			$this->initialize_components();
-			cm_log( 'Components initialized', $log_file );
 		} catch ( \Throwable $e ) {
-			cm_log( 'Initialize components error: ' . $e->getMessage(), $log_file );
-			cm_log( 'File: ' . $e->getFile() . ':' . $e->getLine(), $log_file );
+			// Silently fail component init errors
 		}
-		
+
 		// Hook into WordPress
-		cm_log( 'Hooking into WordPress...', $log_file );
 		try {
 			$this->hook_into_wordpress();
-			cm_log( 'Hooked into WordPress', $log_file );
 		} catch ( \Throwable $e ) {
-			cm_log( 'Hook into WP error: ' . $e->getMessage(), $log_file );
+			// Silently fail hook registration errors
 		}
-		
-		cm_log( 'Bootstrap::init() - Complete', $log_file );
 	}
 	
 	/**
 	 * Load text domain
 	 */
 	private function load_textdomain() {
-		load_plugin_textdomain(
-			'certificate-manager',
-			false,
-			dirname( CERTIFICATE_MANAGER_BASENAME ) . '/languages'
-		);
+		// WordPress automatically loads translations for plugins hosted on WordPress.org since version 4.6.
+		// Manual loading is no longer needed.
 	}
 	
 	/**
@@ -569,12 +542,12 @@ class Bootstrap {
 		add_action( 'admin_post_cm_update_issue_webhook_payload', array( $settings_admin, 'update_issue_webhook_payload' ) );
 		add_action( 'admin_post_cm_create_verification_page', array( $settings_admin, 'create_verification_page' ) );
 		add_action( 'admin_post_cm_delete_issue_webhook', array( $settings_admin, 'delete_issue_webhook' ) );
-		add_action( 'certificate_manager_certificate_issued', function ( $certificate_id ) use ( $verifiable_credential_service ) { try { $verifiable_credential_service->issue( (int) $certificate_id ); } catch ( \Throwable $error ) { error_log( 'Certificate Manager verifiable credential issuance failed: ' . $error->getMessage() ); } }, 5, 1 );
-		add_action( 'certificate_manager_certificate_issued', function ( $certificate_id, $certificate_data ) use ( $webhook_service, $settings ) { try { $mode = $settings->get( 'certificate_issuance_delivery_mode', 'webhook' ); if ( in_array( $mode, array( 'webhook', 'both' ), true ) ) { $webhook_service->dispatch_webhook( 'certificate_issued', $certificate_data, $certificate_id, $certificate_data['webhook_ids'] ?? array() ); } } catch ( \Throwable $error ) { error_log( 'Certificate Manager webhook dispatch failed: ' . $error->getMessage() ); } }, 10, 2 );
-		add_action( 'certificate_manager_certificate_issued', function ( $certificate_id, $certificate_data ) use ( $email_service, $settings ) { try { $mode = $settings->get( 'certificate_issuance_delivery_mode', 'webhook' ); if ( in_array( $mode, array( 'email', 'both' ), true ) ) { $email_service->send_certificate_email( (int) $certificate_id, absint( $certificate_data['template_id'] ?? 0 ), array( 'attach_pdf' => (bool) $settings->get( 'default_email_pdf_attached', true ) ) ); } } catch ( \Throwable $error ) { error_log( 'Certificate Manager issuance email failed: ' . $error->getMessage() ); } }, 15, 2 );
-		add_action( 'certificate_manager_certificates_requested', function ( $request_data ) use ( $webhook_service ) { try { $webhook_service->dispatch_webhook( 'certificate_request_valid', $request_data, 0, null ); } catch ( \Throwable $error ) { error_log( 'Certificate Manager certificate request webhook failed: ' . $error->getMessage() ); } }, 10, 1 );
-		add_action( 'certificate_manager_wallet_link_requested', function ( $claim ) use ( $email_service ) { try { $email_service->send_wallet_claim_email( is_array( $claim ) ? $claim : array() ); } catch ( \Throwable $error ) { error_log( 'Certificate Manager wallet link email failed: ' . $error->getMessage() ); } }, 10, 1 );
-		add_action( 'certificate_manager_wallet_link_webhook_requested', function ( $request_data ) use ( $webhook_service ) { try { $webhook_service->dispatch_webhook( 'wallet_link_requested', is_array( $request_data ) ? $request_data : array(), absint( $request_data['certificate_id'] ?? 0 ), null ); } catch ( \Throwable $error ) { error_log( 'Certificate Manager wallet link webhook failed: ' . $error->getMessage() ); } }, 10, 1 );
+		add_action( 'certificate_manager_certificate_issued', function ( $certificate_id ) use ( $verifiable_credential_service ) { try { $verifiable_credential_service->issue( (int) $certificate_id ); } catch ( \Throwable $error ) { } }, 5, 1 );
+		add_action( 'certificate_manager_certificate_issued', function ( $certificate_id, $certificate_data ) use ( $webhook_service, $settings ) { try { $mode = $settings->get( 'certificate_issuance_delivery_mode', 'webhook' ); if ( in_array( $mode, array( 'webhook', 'both' ), true ) ) { $webhook_service->dispatch_webhook( 'certificate_issued', $certificate_data, $certificate_id, $certificate_data['webhook_ids'] ?? array() ); } } catch ( \Throwable $error ) { } }, 10, 2 );
+		add_action( 'certificate_manager_certificate_issued', function ( $certificate_id, $certificate_data ) use ( $email_service, $settings ) { try { $mode = $settings->get( 'certificate_issuance_delivery_mode', 'webhook' ); if ( in_array( $mode, array( 'email', 'both' ), true ) ) { $email_service->send_certificate_email( (int) $certificate_id, absint( $certificate_data['template_id'] ?? 0 ), array( 'attach_pdf' => (bool) $settings->get( 'default_email_pdf_attached', true ) ) ); } } catch ( \Throwable $error ) { } }, 15, 2 );
+		add_action( 'certificate_manager_certificates_requested', function ( $request_data ) use ( $webhook_service ) { try { $webhook_service->dispatch_webhook( 'certificate_request_valid', $request_data, 0, null ); } catch ( \Throwable $error ) { } }, 10, 1 );
+		add_action( 'certificate_manager_wallet_link_requested', function ( $claim ) use ( $email_service ) { try { $email_service->send_wallet_claim_email( is_array( $claim ) ? $claim : array() ); } catch ( \Throwable $error ) { } }, 10, 1 );
+		add_action( 'certificate_manager_wallet_link_webhook_requested', function ( $request_data ) use ( $webhook_service ) { try { $webhook_service->dispatch_webhook( 'wallet_link_requested', is_array( $request_data ) ? $request_data : array(), absint( $request_data['certificate_id'] ?? 0 ), null ); } catch ( \Throwable $error ) { } }, 10, 1 );
 		add_action( 'admin_init', array( $system_status, 'system_status_init' ) );
 
 		// Network template storage is only available when a repository provides

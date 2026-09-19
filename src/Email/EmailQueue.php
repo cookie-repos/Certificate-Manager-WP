@@ -2,6 +2,9 @@
 /**
  * Email Queue
  *
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+ *
  * @package CertificateManager
  */
 
@@ -128,6 +131,7 @@ class EmailQueue {
 					array( 'id' => $email['id'] )
 				);
 				$results['failed']++;
+				/* translators: %s: recipient email address */
 				$results['errors'][] = sprintf( __( 'Failed to send email to %s', 'certificate-manager' ), $email['to'] );
 			}
 		}

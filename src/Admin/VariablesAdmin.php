@@ -48,7 +48,7 @@ class VariablesAdmin {
 	 * @param string $hook Current hook.
 	 */
 	public function enqueue_scripts( $hook ) {
-		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page check.
 		if ( 'cm_variables' !== $page ) {
 			return;
 		}
@@ -76,14 +76,14 @@ class VariablesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
 		$variable_id = isset( $_POST['variable_id'] ) ? intval( $_POST['variable_id'] ) : 0;
-		$name = sanitize_text_field( $_POST['name'] ?? '' );
-		$key = sanitize_text_field( $_POST['key'] ?? '' );
-		$value = wp_kses_post_deep( $_POST['value'] ?? '' );
+		$name = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
+		$key = sanitize_text_field( wp_unslash( $_POST['key'] ?? '' ) );
+		$value = wp_kses_post_deep( wp_unslash( $_POST['value'] ?? '' ) );
 		$field_type = sanitize_key( $_POST['field_type'] ?? 'text' );
 		$allowed_field_types = array( 'text', 'textarea', 'email', 'number', 'date', 'url', 'image' );
 		$field_options = json_decode( wp_unslash( $_POST['field_options'] ?? '[]' ), true );
@@ -130,7 +130,7 @@ class VariablesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
@@ -151,7 +151,7 @@ class VariablesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'certificate-manager' ) ), 403 );
 		}
 		
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cm-admin-nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'cm-admin-nonce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		

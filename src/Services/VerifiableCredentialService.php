@@ -75,6 +75,7 @@ class VerifiableCredentialService {
 
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'certificate_manager_verifiable_credentials';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is WP-prefixed.
 		$stored_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE certificate_id = %d", $certificate_id ) );
 		$data = array(
 			'credential_jwt' => $jwt,
@@ -225,6 +226,7 @@ class VerifiableCredentialService {
 					'credential_definition' => array( 'type' => array( 'VerifiableCredential', 'OpenBadgeCredential' ) ),
 					'credential_metadata' => array(
 						'display' => array( array(
+							/* translators: %s: site name */
 							'name' => sprintf( __( '%s certificate', 'certificate-manager' ), get_bloginfo( 'name' ) ),
 							'locale' => str_replace( '_', '-', determine_locale() ),
 							'background_color' => '#315efb',
@@ -426,7 +428,12 @@ class VerifiableCredentialService {
 		$issuer   = $this->get_issuer_profile();
 		$fields   = $this->get_credential_field_values( $certificate );
 		$title    = $template['title'] ?? __( 'Certificate', 'certificate-manager' );
-		$criteria = $fields['criteria'] ?? $fields['criteria_narrative'] ?? sprintf( __( 'Awarded by %s for completing %s.', 'certificate-manager' ), get_bloginfo( 'name' ), $title );
+		$criteria = $fields['criteria'] ?? $fields['criteria_narrative'] ?? sprintf(
+			/* translators: 1: site name, 2: certificate/template title */
+			__( 'Awarded by %1$s for completing %2$s.', 'certificate-manager' ),
+			get_bloginfo( 'name' ),
+			$title
+		);
 		$subject  = array(
 			'id'   => 'urn:uuid:' . $certificate['internal_id'],
 			'type' => array( 'AchievementSubject' ),
@@ -541,6 +548,7 @@ class VerifiableCredentialService {
 
 	private function get_stored_credential( int $certificate_id ) {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name uses WP prefix; no caching for credential retrieval.
 		return $wpdb->get_var( $wpdb->prepare( "SELECT credential_jwt FROM {$wpdb->prefix}certificate_manager_verifiable_credentials WHERE certificate_id = %d AND key_id = %s", $certificate_id, self::CREDENTIAL_PROFILE ) );
 	}
 
@@ -549,6 +557,7 @@ class VerifiableCredentialService {
 			return false;
 		}
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name uses WP prefix.
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}certificate_manager_certificates WHERE verification_token LIKE %s LIMIT 2", $wpdb->esc_like( $token ) . '%' ), ARRAY_A );
 		return 1 === count( $rows ) ? $rows[0] : false;
 	}
@@ -621,6 +630,7 @@ class VerifiableCredentialService {
 		while ( $error = openssl_error_string() ) {
 			$errors[] = $error;
 		}
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- OpenSSL errors are infrastructure-level and cannot be stored in the DB at this point.
 		error_log( 'Certificate Manager ' . $operation . ' failed' . ( $errors ? ': ' . implode( ' | ', $errors ) : '' ) );
 	}
 

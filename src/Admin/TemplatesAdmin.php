@@ -2,6 +2,13 @@
 /**
  * Templates Admin Interface
  *
+ * All AJAX handlers in this file call verify_request() first, which internally
+ * calls check_ajax_referer() to verify the nonce. The phpcs nonce-verification
+ * sniff cannot detect this indirect check, so the warnings below are suppressed.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification.Missing
+ * phpcs:disable WordPress.Security.NonceVerification.Recommended
+ *
  * @package CertificateManager
  */
 
@@ -39,7 +46,7 @@ class TemplatesAdmin {
 	}
 
 	public function enqueue_scripts( $hook ) {
-		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page check.
 		if ( 'cm_templates' !== $page ) {
 			return;
 		}
@@ -71,14 +78,14 @@ class TemplatesAdmin {
 	 */
 	private function get_qr_badges(): array {
 		$badges = array(
-			'heritage-green' => array( 'label' => __( 'Heritage Green', 'certificate-manager' ), 'file' => 'Heritage Green Min.png', 'ratio' => 1 ),
-			'citrus-burst' => array( 'label' => __( 'Citrus Burst', 'certificate-manager' ), 'file' => 'Citrus Burst Min.png', 'ratio' => 1 ),
-			'obsidian-gold' => array( 'label' => __( 'Obsidian Gold', 'certificate-manager' ), 'file' => 'Obsidian Gold Min.png', 'ratio' => 1 ),
-			'mint-candy' => array( 'label' => __( 'Mint Candy', 'certificate-manager' ), 'file' => 'Mint Candy Min.png', 'ratio' => 1 ),
-			'midnight-navy' => array( 'label' => __( 'Midnight Navy', 'certificate-manager' ), 'file' => 'Midnight Navy Min.png', 'ratio' => 1 ),
-			'burgundy-rose' => array( 'label' => __( 'Burgundy Rose', 'certificate-manager' ), 'file' => 'Burgundy Rose Min.png', 'ratio' => 1 ),
-			'signal-blue' => array( 'label' => __( 'Signal Blue', 'certificate-manager' ), 'file' => 'Signal Blue Min.png', 'ratio' => 1 ),
-			'ultraviolet-pop' => array( 'label' => __( 'Ultraviolet Pop', 'certificate-manager' ), 'file' => 'Ultraviolet Pop Min.png', 'ratio' => 1 ),
+			'heritage-green' => array( 'label' => __( 'Heritage Green', 'certificate-manager' ), 'file' => 'Heritage-Green-Min.png', 'ratio' => 1 ),
+			'citrus-burst' => array( 'label' => __( 'Citrus Burst', 'certificate-manager' ), 'file' => 'Citrus-Burst-Min.png', 'ratio' => 1 ),
+			'obsidian-gold' => array( 'label' => __( 'Obsidian Gold', 'certificate-manager' ), 'file' => 'Obsidian-Gold-Min.png', 'ratio' => 1 ),
+			'mint-candy' => array( 'label' => __( 'Mint Candy', 'certificate-manager' ), 'file' => 'Mint-Candy-Min.png', 'ratio' => 1 ),
+			'midnight-navy' => array( 'label' => __( 'Midnight Navy', 'certificate-manager' ), 'file' => 'Midnight-Navy-Min.png', 'ratio' => 1 ),
+			'burgundy-rose' => array( 'label' => __( 'Burgundy Rose', 'certificate-manager' ), 'file' => 'Burgundy-Rose-Min.png', 'ratio' => 1 ),
+			'signal-blue' => array( 'label' => __( 'Signal Blue', 'certificate-manager' ), 'file' => 'Signal-Blue-Min.png', 'ratio' => 1 ),
+			'ultraviolet-pop' => array( 'label' => __( 'Ultraviolet Pop', 'certificate-manager' ), 'file' => 'Ultraviolet-Pop-Min.png', 'ratio' => 1 ),
 		);
 		foreach ( $badges as $key => &$badge ) {
 			$badge['id'] = $key;
@@ -180,16 +187,20 @@ class TemplatesAdmin {
 			wp_send_json_error( array( 'message' => $temp_file->get_error_message() ), 502 );
 		}
 
-		$path = (string) parse_url( $image_url, PHP_URL_PATH );
+		$path = (string) wp_parse_url( $image_url, PHP_URL_PATH );
 		$extension = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
 		$extension = in_array( $extension, array( 'jpg', 'jpeg', 'png', 'webp' ), true ) ? $extension : 'jpg';
 		$file = array(
 			'name' => 'pixabay-' . ( $pixabay_id ?: wp_generate_uuid4() ) . '.' . $extension,
 			'tmp_name' => $temp_file,
 		);
-		$attachment_id = media_handle_sideload( $file, 0, sprintf( __( 'Pixabay image by %s', 'certificate-manager' ), $author ) );
+		$attachment_id = media_handle_sideload( $file, 0, sprintf(
+			/* translators: %s: Pixabay image author name */
+			__( 'Pixabay image by %s', 'certificate-manager' ),
+			$author
+		) );
 		if ( is_wp_error( $attachment_id ) ) {
-			@unlink( $temp_file );
+			wp_delete_file( $temp_file );
 			wp_send_json_error( array( 'message' => $attachment_id->get_error_message() ), 500 );
 		}
 
@@ -213,9 +224,13 @@ class TemplatesAdmin {
 		$template_id = isset( $_POST['template_id'] ) ? absint( $_POST['template_id'] ) : 0;
 		$name = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
 		$description = sanitize_textarea_field( wp_unslash( $_POST['description'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- JSON-decoded and sanitized element-by-element via sanitize_element().
 		$elements = $this->decode_json_array( $_POST['content'] ?? '[]' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- JSON-decoded array of safe background config values.
 		$background = $this->decode_json_array( $_POST['background'] ?? '{}' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- JSON-decoded array of variable keys.
 		$variable_keys = $this->decode_json_array( $_POST['variables'] ?? '[]' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- JSON-decoded array of webhook IDs, cast to int below.
 		$webhook_ids = $this->decode_json_array( $_POST['webhook_ids'] ?? '[]' );
 		$orientation = sanitize_key( wp_unslash( $_POST['orientation'] ?? 'landscape' ) );
 
@@ -343,6 +358,7 @@ class TemplatesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Template not found.', 'certificate-manager' ) ), 404 );
 		}
 
+		/* translators: %s: original template name */
 		$new_name = sprintf( __( '%s (Copy)', 'certificate-manager' ), $template['title'] );
 		$data = array(
 			'title' => $new_name,
@@ -576,10 +592,10 @@ class TemplatesAdmin {
 	}
 
 	private function is_pixabay_url( $url ) {
-		if ( ! wp_http_validate_url( $url ) || 'https' !== strtolower( (string) parse_url( $url, PHP_URL_SCHEME ) ) ) {
+		if ( ! wp_http_validate_url( $url ) || 'https' !== strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ) ) {
 			return false;
 		}
-		$host = strtolower( (string) parse_url( $url, PHP_URL_HOST ) );
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
 		return 'pixabay.com' === $host || '.pixabay.com' === substr( $host, -12 );
 	}
 

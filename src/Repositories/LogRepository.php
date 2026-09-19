@@ -86,10 +86,12 @@ class LogRepository {
 		
 		// Get total count
 		$count_query = "SELECT COUNT(*) FROM {$table_name} WHERE {$where_sql}";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic query built from validated inputs; table name is WP-prefixed.
 		$total = $wpdb->get_var( $params ? $wpdb->prepare( $count_query, $params ) : $count_query );
 		
 		// Get entries
 		$query = "SELECT * FROM {$table_name} WHERE {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic query built from validated inputs; table name is WP-prefixed.
 		$entries = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $params, array( $per_page, $offset ) ) ), ARRAY_A );
 		
 		return array(
@@ -113,6 +115,7 @@ class LogRepository {
 		$table_name = $wpdb->prefix . 'certificate_manager_operational_logs';
 		
 		return $wpdb->get_results( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 			"SELECT * FROM {$table_name} WHERE log_level IN (%s, %s) ORDER BY created_at DESC LIMIT %d",
 			'error', 'critical', $limit
 		), ARRAY_A );
@@ -131,6 +134,7 @@ class LogRepository {
 		$table_name = $wpdb->prefix . 'certificate_manager_operational_logs';
 		
 		return $wpdb->get_results( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 			"SELECT * FROM {$table_name} WHERE log_category = %s ORDER BY created_at DESC LIMIT %d",
 			$category, $limit
 		), ARRAY_A );
@@ -145,6 +149,7 @@ class LogRepository {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'certificate_manager_operational_logs';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed, one-time full-table delete.
 		return false !== $wpdb->query( "DELETE FROM {$table_name}" );
 	}
 	
@@ -159,9 +164,10 @@ class LogRepository {
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_operational_logs';
 		
-		$cut_off = date( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
+		$cut_off = gmdate( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
 		
 		return (int) $wpdb->query( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 			"DELETE FROM {$table_name} WHERE created_at < %s",
 			$cut_off
 		) );

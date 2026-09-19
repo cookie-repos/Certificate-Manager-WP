@@ -2,6 +2,12 @@
 /**
  * Certificate Manager Migration Manager
  *
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+ * phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
+ * phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter
+ *
  * @package CertificateManager
  */
 
@@ -63,7 +69,7 @@ class MigrationManager {
 			// Update plugin version
 			update_option( 'certificate_manager_version', $this->version );
 		} catch ( \Exception $e ) {
-			// Log error but don't fail activation
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Migration errors are infrastructure-level and cannot be stored in DB at this point.
 			error_log( 'Certificate Manager migration error: ' . $e->getMessage() );
 		}
 	}
@@ -91,6 +97,7 @@ class MigrationManager {
 				}
 			}
 		} catch ( \Exception $e ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Table creation errors are infrastructure-level.
 			error_log( 'Certificate Manager table creation error: ' . $e->getMessage() );
 		}
 	}

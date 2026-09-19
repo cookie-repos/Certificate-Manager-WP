@@ -112,13 +112,17 @@ class SettingsAdmin {
 		$preview_style = in_array( $preview_style, array( 'editorial', 'registry', 'heritage', 'folio', 'night' ), true ) ? $preview_style : 'editorial';
 		$preview_accent = in_array( $settings['verification_accent'] ?? 'indigo', array( 'indigo', 'emerald', 'violet', 'amber', 'charcoal' ), true ) ? $settings['verification_accent'] : 'indigo';
 		$preview_credentials_enabled = ! isset( $settings['verifiable_credentials_enabled'] ) || ! empty( $settings['verifiable_credentials_enabled'] );
-		$purge_status = sanitize_key( wp_unslash( $_GET['cm_purge_status'] ?? '' ) );
-		$purge_count = absint( $_GET['cm_purge_count'] ?? 0 );
+		$purge_status = sanitize_key( wp_unslash( $_GET['cm_purge_status'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display parameter.
+		$purge_count = absint( $_GET['cm_purge_count'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display parameter.
 		?>
 		<div class="wrap certificate-manager-settings">
 			<h1><?php esc_html_e( 'Certificate Manager Settings', 'certificate-manager' ); ?></h1>
-			<?php if ( 'certificates_cleared' === $purge_status ) : ?><div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( _n( '%d certificate was permanently cleared. Audit and operational logs were kept.', '%d certificates were permanently cleared. Audit and operational logs were kept.', $purge_count, 'certificate-manager' ), $purge_count ) ); ?></p></div><?php endif; ?>
-			<?php if ( 'templates_cleared' === $purge_status ) : ?><div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( _n( '%d template was permanently cleared. Audit and operational logs were kept.', '%d templates were permanently cleared. Audit and operational logs were kept.', $purge_count, 'certificate-manager' ), $purge_count ) ); ?></p></div><?php endif; ?>
+			<?php if ( 'certificates_cleared' === $purge_status ) : ?><div class="notice notice-success is-dismissible"><p><?php
+			/* translators: %d: number of certificates cleared */
+			echo esc_html( sprintf( _n( '%d certificate was permanently cleared. Audit and operational logs were kept.', '%d certificates were permanently cleared. Audit and operational logs were kept.', $purge_count, 'certificate-manager' ), $purge_count ) ); ?></p></div><?php endif; ?>
+			<?php if ( 'templates_cleared' === $purge_status ) : ?><div class="notice notice-success is-dismissible"><p><?php
+			/* translators: %d: number of templates cleared */
+			echo esc_html( sprintf( _n( '%d template was permanently cleared. Audit and operational logs were kept.', '%d templates were permanently cleared. Audit and operational logs were kept.', $purge_count, 'certificate-manager' ), $purge_count ) ); ?></p></div><?php endif; ?>
 			<?php if ( 'confirmation_failed' === $purge_status ) : ?><div class="notice notice-error"><p><?php esc_html_e( 'Nothing was deleted. Confirm the checkbox and enter the requested phrase exactly.', 'certificate-manager' ); ?></p></div><?php endif; ?>
 			<?php if ( 'templates_require_certificate_purge' === $purge_status ) : ?><div class="notice notice-error"><p><?php esc_html_e( 'Clear all certificates before permanently clearing templates, so certificate history is not orphaned.', 'certificate-manager' ); ?></p></div><?php endif; ?>
 			<?php if ( 'purge_failed' === $purge_status ) : ?><div class="notice notice-error"><p><?php esc_html_e( 'Nothing further was deleted because the cleanup could not be completed.', 'certificate-manager' ); ?></p></div><?php endif; ?>
@@ -277,7 +281,7 @@ class SettingsAdmin {
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Certificate email', 'certificate-manager' ); ?></th>
-						<td><label for="cm-default-email-subject"><?php esc_html_e( 'Subject', 'certificate-manager' ); ?></label><br><input class="regular-text" id="cm-default-email-subject" type="text" name="certificate_manager_settings[default_email_subject]" value="<?php echo esc_attr( $settings['default_email_subject'] ?? __( 'Your Certificate is Ready', 'certificate-manager' ) ); ?>"><p><label for="cm-default-email-body"><?php esc_html_e( 'Message', 'certificate-manager' ); ?></label><br><textarea class="large-text" rows="7" id="cm-default-email-body" name="certificate_manager_settings[default_email_body]"><?php echo esc_textarea( $settings['default_email_body'] ?? '' ); ?></textarea></p><p class="description"><?php esc_html_e( 'Useful placeholders: {{recipient_name}}, {{certificate_number}}, {{issue_date}}, {{expiry_date}}, {{verification_url}}, {{site_name}}. WordPress sends this through your site’s normal mail configuration.', 'certificate-manager' ); ?></p></td>
+						<td><label for="cm-default-email-subject"><?php esc_html_e( 'Subject', 'certificate-manager' ); ?></label><br><input class="regular-text" id="cm-default-email-subject" type="text" name="certificate_manager_settings[default_email_subject]" value="<?php echo esc_attr( ['default_email_subject'] ?? esc_attr__( 'Your Certificate is Ready', 'certificate-manager' ) ); ?>"><p><label for="cm-default-email-body"><?php esc_html_e( 'Message', 'certificate-manager' ); ?></label><br><textarea class="large-text" rows="7" id="cm-default-email-body" name="certificate_manager_settings[default_email_body]"><?php echo esc_textarea( $settings['default_email_body'] ?? '' ); ?></textarea></p><p class="description"><?php esc_html_e( 'Useful placeholders: {{recipient_name}}, {{certificate_number}}, {{issue_date}}, {{expiry_date}}, {{verification_url}}, {{site_name}}. WordPress sends this through your site’s normal mail configuration.', 'certificate-manager' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Verification page', 'certificate-manager' ); ?></th>
@@ -339,7 +343,7 @@ class SettingsAdmin {
 		$event = sanitize_key( wp_unslash( $_POST['event'] ?? 'certificate_issued' ) );
 		$event = in_array( $event, array( 'certificate_issued', 'certificate_request_valid', 'wallet_link_requested' ), true ) ? $event : 'certificate_issued';
 		$payload_fields = $this->sanitize_webhook_payload_fields( $_POST['payload_fields'] ?? array() );
-		if ( '' === $name || ! wp_http_validate_url( $url ) || 'https' !== strtolower( (string) parse_url( $url, PHP_URL_SCHEME ) ) ) { $this->redirect_to_webhooks(); }
+		if ( '' === $name || ! wp_http_validate_url( $url ) || 'https' !== strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ) ) { $this->redirect_to_webhooks(); }
 		$this->webhook_repo->create( array( 'name' => $name, 'url' => $url, 'events' => array( $event ), 'payload_fields' => $payload_fields, 'enabled' => 1 ) );
 		$this->redirect_to_webhooks();
 	}
@@ -504,7 +508,7 @@ class SettingsAdmin {
 		foreach ( $file_paths as $file_path ) {
 			$real_path = realpath( $file_path );
 			if ( $real_path && 0 === strpos( $real_path, trailingslashit( $root ) ) ) {
-				unlink( $real_path );
+				wp_delete_file( $real_path );
 			}
 		}
 	}

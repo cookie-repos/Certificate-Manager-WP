@@ -7,6 +7,10 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
+ *
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
  */
 
 namespace Apirone\Lib\PhpQRCode;

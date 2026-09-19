@@ -111,7 +111,7 @@ class AuditRepository {
 	 */
 	private function get_api_key_id() {
 		// Get API key from headers or request
-		$auth = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? $_SERVER['HTTP_AUTHORIZATION'] : null;
+		$auth = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : null;
 		
 		if ( $auth && strpos( $auth, 'Bearer ' ) === 0 ) {
 			$token = trim( substr( $auth, 7 ) );
@@ -123,6 +123,7 @@ class AuditRepository {
 			// digest of the bearer token.
 			global $wpdb;
 			$table_name = $wpdb->prefix . 'certificate_manager_api_keys';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is WP-prefixed.
 			$keys = $wpdb->get_results( $wpdb->prepare( "SELECT id, secret_hash FROM {$table_name} WHERE secret_prefix = %s AND is_active = 1", substr( $token, 0, 8 ) ), ARRAY_A );
 			foreach ( $keys as $key ) {
 				if ( wp_check_password( $token, $key['secret_hash'] ) ) {
@@ -152,7 +153,7 @@ class AuditRepository {
 		
 		foreach ( $ip_keys as $key ) {
 			if ( isset( $_SERVER[ $key ] ) ) {
-				$ip = $_SERVER[ $key ];
+				$ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- sanitize_text_field + wp_unslash applied.
 				// Handle multiple IPs
 				if ( strpos( $ip, ',' ) !== false ) {
 					$ips = array_map( 'trim', explode( ',', $ip ) );
@@ -206,10 +207,12 @@ class AuditRepository {
 		
 		// Get total count
 		$count_query = "SELECT COUNT(*) FROM {$table_name} WHERE {$where_sql}";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic query built from validated inputs; table name is WP-prefixed.
 		$total = $wpdb->get_var( $params ? $wpdb->prepare( $count_query, $params ) : $count_query );
 		
 		// Get entries
 		$query = "SELECT * FROM {$table_name} WHERE {$where_sql} ORDER BY occurred_at DESC LIMIT %d OFFSET %d";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic query built from validated inputs; table name is WP-prefixed.
 		$entries = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $params, array( $per_page, $offset ) ) ), ARRAY_A );
 		
 		return array(
@@ -231,7 +234,7 @@ class AuditRepository {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_audit_log';
-		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed; no caching needed.
 		return $wpdb->get_results( $wpdb->prepare(
 			"SELECT * FROM {$table_name} ORDER BY occurred_at DESC LIMIT %d",
 			$limit
@@ -247,6 +250,7 @@ class AuditRepository {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'certificate_manager_audit_log';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed; full-table delete for clear operation.
 		return false !== $wpdb->query( "DELETE FROM {$table_name}" );
 	}
 }

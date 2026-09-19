@@ -3,6 +3,9 @@ dist/
 *.zip
 *.sha256
 
+# Marketing site (not for plugin distribution)
+marketing-site/
+
 # Development files
 *.log
 *.bak

@@ -2,6 +2,15 @@
 /**
  * Certificate Manager Email Service
  *
+ * All direct database queries in this file use table names set by WordPress via
+ * $wpdb->prefix. phpcs suppresses below address the interpolated-table-name and
+ * caching warnings for queries that fetch live certificate data on every request.
+ *
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+ * phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+ * phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter
+ *
  * @package CertificateManager
  */
 
@@ -126,10 +135,13 @@ class EmailService {
 		}
 		$recipient_name = sanitize_text_field( $claim['recipient_name'] ?? '' );
 		$certificate_number = sanitize_text_field( $claim['certificate_number'] ?? '' );
+		/* translators: %s: site name */
 		$subject = sprintf( __( 'Your private wallet link from %s', 'certificate-manager' ), get_bloginfo( 'name' ) );
 		$body = sprintf(
 			'<p>%s</p><p>%s</p><p><a href="%s">%s</a></p><p><small>%s</small></p>',
+			/* translators: %s: recipient name */
 			esc_html( $recipient_name ? sprintf( __( 'Hello %s,', 'certificate-manager' ), $recipient_name ) : __( 'Hello,', 'certificate-manager' ) ),
+			/* translators: %s: certificate number */
 			esc_html( $certificate_number ? sprintf( __( 'Use this private link to add certificate %s to a compatible wallet.', 'certificate-manager' ), $certificate_number ) : __( 'Use this private link to add your certificate to a compatible wallet.', 'certificate-manager' ) ),
 			esc_url( $claim['claim_url'] ),
 			esc_html__( 'Add certificate to wallet', 'certificate-manager' ),
@@ -371,6 +383,7 @@ class EmailService {
 		
 		$defaults = array(
 			'subject' => sprintf(
+				/* translators: %s: site name */
 				__( 'Test Email - %s', 'certificate-manager' ),
 				get_bloginfo( 'name' )
 			),
@@ -384,6 +397,7 @@ class EmailService {
 		
 		if ( $result ) {
 			$this->log( 'info', sprintf(
+				/* translators: %s: recipient email address */
 				__( 'Test email sent to %s', 'certificate-manager' ),
 				$to
 			) );

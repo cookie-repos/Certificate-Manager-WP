@@ -88,6 +88,7 @@ class SchedulingService {
 		global $wpdb;
 		
 		$cert_table = $wpdb->prefix . 'certificate_manager_certificates';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$certificate = $wpdb->get_row( $wpdb->prepare(
 			"SELECT issue_date, expiry_date FROM {$cert_table} WHERE id = %d",
 			$certificate_id
@@ -144,6 +145,7 @@ class SchedulingService {
 		$table_name = $wpdb->prefix . 'certificate_manager_scheduled_jobs';
 		
 		return $wpdb->get_results( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 			"SELECT * FROM {$table_name}
 			 WHERE is_completed = 0 AND failed = 0 AND scheduled_at <= %s
 			 ORDER BY scheduled_at ASC

@@ -78,8 +78,9 @@ class RetentionPolicyService {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_audit_log';
-		$cut_off = date( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
+		$cut_off = gmdate( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed, no caching needed for cleanup.
 		$wpdb->query( $wpdb->prepare(
 			"DELETE FROM {$table_name} WHERE occurred_at < %s",
 			$cut_off
@@ -95,8 +96,9 @@ class RetentionPolicyService {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_operational_logs';
-		$cut_off = date( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
+		$cut_off = gmdate( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed, no caching needed for cleanup.
 		$wpdb->query( $wpdb->prepare(
 			"DELETE FROM {$table_name} WHERE created_at < %s",
 			$cut_off
@@ -111,6 +113,7 @@ class RetentionPolicyService {
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_download_tokens';
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$wpdb->query( "DELETE FROM {$table_name} WHERE expires_at < " . $wpdb->prepare( '%s', current_time( 'mysql' ) ) );
 	}
 	
@@ -122,6 +125,7 @@ class RetentionPolicyService {
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_idempotency_keys';
 		
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$wpdb->query( "DELETE FROM {$table_name} WHERE expires_at < " . $wpdb->prepare( '%s', current_time( 'mysql' ) ) );
 	}
 	
@@ -139,9 +143,10 @@ class RetentionPolicyService {
 		$settings = new \CertificateManager\Core\Settings();
 		$days = $settings->get( 'trash_retention_days', 30 );
 		
-		$cut_off = date( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
+		$cut_off = gmdate( 'Y-m-d H:i:s', time() - ( $days * 24 * 60 * 60 ) );
 		
 		// Get trashed certificates to delete
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$certs = $wpdb->get_results( $wpdb->prepare(
 			"SELECT id FROM {$cert_table}
 			 WHERE status = 'trash' AND trashed_at < %s",
@@ -154,12 +159,15 @@ class RetentionPolicyService {
 		
 		// Delete certificate fields
 		$ids = implode( ',', array_column( $certs, 'id' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs are integer-cast, table names are WP-prefixed.
 		$wpdb->query( "DELETE FROM {$field_table} WHERE certificate_id IN ({$ids})" );
 		
 		// Delete certificate tags
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs are integer-cast, table names are WP-prefixed.
 		$wpdb->query( "DELETE FROM {$tag_table} WHERE certificate_id IN ({$ids})" );
 		
 		// Delete certificates
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs are integer-cast, table names are WP-prefixed.
 		$wpdb->query( "DELETE FROM {$cert_table} WHERE id IN ({$ids})" );
 	}
 }

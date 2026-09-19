@@ -24,12 +24,15 @@ echo "Building Certificate Manager v${VERSION}..."
 # Package the complete implementation trees. This avoids a second, fragile list
 # of Bootstrap dependencies in the release script.
 cp -R "$PROJECT_DIR/src" "$PACKAGE_DIR/src"
+# Remove test files from the distribution package
+rm -rf "$PACKAGE_DIR/src/Tests"
 cp -R "$PROJECT_DIR/lib" "$PACKAGE_DIR/lib"
 cp -R "$PROJECT_DIR/vendor" "$PACKAGE_DIR/vendor"
 mkdir -p "$PACKAGE_DIR/languages"
 cp "$PROJECT_DIR/languages/certificate-manager.pot" "$PACKAGE_DIR/languages/"
 cp "$PROJECT_DIR/readme.txt" "$PACKAGE_DIR/"
-cp "$PROJECT_DIR/THIRD-PARTY-NOTICES.md" "$PACKAGE_DIR/"
+cp "$PROJECT_DIR/docs/THIRD-PARTY-NOTICES.md" "$PACKAGE_DIR/docs/THIRD-PARTY-NOTICES.md" 2>/dev/null || true
+cp "$PROJECT_DIR/composer.json" "$PACKAGE_DIR/"
 
 cp "$PROJECT_DIR/certificate-manager.php" "$PACKAGE_DIR/"
 

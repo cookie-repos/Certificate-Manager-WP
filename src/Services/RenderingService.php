@@ -80,6 +80,7 @@ class RenderingService {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_template_versions';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are WP-prefixed.
 		return $wpdb->get_row( $wpdb->prepare(
 			"SELECT v.*, t.title AS template_title, t.orientation, t.page_width, t.page_height
 			 FROM {$table_name} v
@@ -127,6 +128,7 @@ class RenderingService {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'certificate_manager_certificate_fields';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed.
 		$results = $wpdb->get_results( $wpdb->prepare(
 			"SELECT variable_key, variable_label, value FROM {$table_name} WHERE certificate_id = %d",
 			$certificate_id
@@ -551,14 +553,14 @@ class RenderingService {
 	 */
 	private function get_qr_badge( string $badge_id ) {
 		$badges = array(
-			'heritage-green' => array( 'file' => 'Heritage Green Min.png', 'ratio' => 1 ),
-			'citrus-burst' => array( 'file' => 'Citrus Burst Min.png', 'ratio' => 1 ),
-			'obsidian-gold' => array( 'file' => 'Obsidian Gold Min.png', 'ratio' => 1 ),
-			'mint-candy' => array( 'file' => 'Mint Candy Min.png', 'ratio' => 1 ),
-			'midnight-navy' => array( 'file' => 'Midnight Navy Min.png', 'ratio' => 1 ),
-			'burgundy-rose' => array( 'file' => 'Burgundy Rose Min.png', 'ratio' => 1 ),
-			'signal-blue' => array( 'file' => 'Signal Blue Min.png', 'ratio' => 1 ),
-			'ultraviolet-pop' => array( 'file' => 'Ultraviolet Pop Min.png', 'ratio' => 1 ),
+			'heritage-green' => array( 'file' => 'Heritage-Green-Min.png', 'ratio' => 1 ),
+			'citrus-burst' => array( 'file' => 'Citrus-Burst-Min.png', 'ratio' => 1 ),
+			'obsidian-gold' => array( 'file' => 'Obsidian-Gold-Min.png', 'ratio' => 1 ),
+			'mint-candy' => array( 'file' => 'Mint-Candy-Min.png', 'ratio' => 1 ),
+			'midnight-navy' => array( 'file' => 'Midnight-Navy-Min.png', 'ratio' => 1 ),
+			'burgundy-rose' => array( 'file' => 'Burgundy-Rose-Min.png', 'ratio' => 1 ),
+			'signal-blue' => array( 'file' => 'Signal-Blue-Min.png', 'ratio' => 1 ),
+			'ultraviolet-pop' => array( 'file' => 'Ultraviolet-Pop-Min.png', 'ratio' => 1 ),
 		);
 		return $badges[ sanitize_key( $badge_id ) ] ?? $badges['heritage-green'];
 	}
@@ -763,13 +765,13 @@ class RenderingService {
 		// Get certificate
 		$certificate = $this->issuance_service->get_certificate_repository()->get_certificate( $certificate_id );
 		if ( ! $certificate ) {
-			wp_die( __( 'Certificate not found', 'certificate-manager' ) );
+			wp_die( esc_html__( 'Certificate not found', 'certificate-manager' ) );
 		}
 		
 		// Get PDF file path
 		$file_path = $certificate['pdf_file_path'] ?? null;
 		if ( ! $file_path || ! file_exists( $file_path ) ) {
-			wp_die( __( 'PDF not found', 'certificate-manager' ) );
+			wp_die( esc_html__( 'PDF not found', 'certificate-manager' ) );
 		}
 		
 		$this->stream_pdf_file( $file_path, $force_download );
@@ -777,7 +779,7 @@ class RenderingService {
 
 	public function stream_pdf_file( string $file_path, bool $force_download = true ) {
 		if ( ! file_exists( $file_path ) ) {
-			wp_die( __( 'PDF not found', 'certificate-manager' ) );
+			wp_die( esc_html__( 'PDF not found', 'certificate-manager' ) );
 		}
 
 		header( 'Content-Type: application/pdf' );
@@ -786,7 +788,8 @@ class RenderingService {
 		header( 'Cache-Control: private, max-age=0, must-revalidate' );
 		
 		// Output file
-		@readfile( $file_path );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Streaming binary PDF; WP_Filesystem does not support streaming output.
+		readfile( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
 	}
 	

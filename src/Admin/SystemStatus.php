@@ -59,7 +59,7 @@ class SystemStatus {
 	 */
 	public function system_status_init() {
 		// Handle diagnostic actions
-		if ( isset( $_GET['cm_action'] ) ) {
+		if ( isset( $_GET['cm_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified inside handle_diagnostic_action.
 			$this->handle_diagnostic_action();
 		}
 	}
@@ -88,7 +88,7 @@ class SystemStatus {
 				</tr>
 				<tr>
 					<th><?php esc_html_e( 'Web Server', 'certificate-manager' ); ?></th>
-					<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown' ); ?></td>
+					<td><?php echo esc_html( isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : 'Unknown' ); ?></td>
 				</tr>
 				<tr>
 					<th><?php esc_html_e( 'Memory Limit', 'certificate-manager' ); ?></th>
@@ -161,9 +161,11 @@ class SystemStatus {
 				throw new \RuntimeException( __( 'The PDF engine returned invalid output.', 'certificate-manager' ) );
 			}
 
+			/* translators: %s: mPDF version number */
 			echo '<p><span style="color:green;">' . sprintf( esc_html__( 'Bundled mPDF %s generated a test PDF successfully.', 'certificate-manager' ), esc_html( \Mpdf\Mpdf::VERSION ) ) . '</span></p>';
 			echo '<p class="description">' . esc_html__( 'PDF generation is self-contained; no Composer command or separate WordPress plugin is required.', 'certificate-manager' ) . '</p>';
 		} catch ( \Throwable $error ) {
+			/* translators: %s: error message */
 			echo '<p><span style="color:red;">' . esc_html( sprintf( __( 'Bundled mPDF could not generate a PDF: %s', 'certificate-manager' ), $error->getMessage() ) ) . '</span></p>';
 		}
 	}
@@ -195,6 +197,7 @@ class SystemStatus {
 		echo '<tr><th>' . esc_html__( 'Table', 'certificate-manager' ) . '</th><th>' . esc_html__( 'Status', 'certificate-manager' ) . '</th></tr>';
 		
 		foreach ( $tables as $table_name => $full_name ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Schema check query, caching not appropriate.
 			$exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $full_name ) );
 			echo '<tr>';
 			echo '<td>' . esc_html( $table_name ) . '</td>';
@@ -213,11 +216,12 @@ class SystemStatus {
 			return;
 		}
 		
-		if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( $_GET['nonce'], 'cm_diagnostic' ) ) {
+		if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'cm_diagnostic' ) ) {
 			return;
 		}
 		
-		switch ( $_GET['cm_action'] ) {
+		$cm_action = isset( $_GET['cm_action'] ) ? sanitize_key( wp_unslash( $_GET['cm_action'] ) ) : '';
+		switch ( $cm_action ) {
 			case 'test_email':
 				$this->test_email();
 				break;

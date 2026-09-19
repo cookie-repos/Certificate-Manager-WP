@@ -33,7 +33,7 @@ class IdempotencyService {
 		$wpdb->insert( $table_name, array(
 			'key_hash' => $key_hash,
 			'certificate_id' => $certificate_id,
-			'expires_at' => date( 'Y-m-d H:i:s', time() + 86400 ), // 24 hours
+			'expires_at' => gmdate( 'Y-m-d H:i:s', time() + 86400 ), // 24 hours
 			'created_at' => current_time( 'mysql' ),
 		) );
 		
@@ -56,6 +56,7 @@ class IdempotencyService {
 		$cert_table = $wpdb->prefix . 'certificate_manager_certificates';
 		
 		return $wpdb->get_row( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are WP-prefixed, not user input.
 			"SELECT c.* FROM {$idem_table} i
 			 JOIN {$cert_table} c ON i.certificate_id = c.id
 			 WHERE i.key_hash = %s AND i.expires_at > %s",

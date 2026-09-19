@@ -2,6 +2,11 @@
 /**
  * Certificate Manager Webhook Service
  *
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+ * phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+ * phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter
+ *
  * @package CertificateManager
  */
 
@@ -236,6 +241,7 @@ class WebhookService {
 			$this->mark_delivery_failed( $delivery, $response->get_error_message(), 0 );
 			
 			$this->log_repo->add_log( 'error', 'Webhook', sprintf(
+				/* translators: %s: error message */
 				__( 'Webhook delivery failed: %s', 'certificate-manager' ),
 				$response->get_error_message()
 			), array(
@@ -266,6 +272,7 @@ class WebhookService {
 			}
 			
 			$this->log_repo->add_log( 'info', 'Webhook', sprintf(
+				/* translators: %d: HTTP response status code */
 				__( 'Webhook delivered successfully (status %d)', 'certificate-manager' ),
 				$response_code
 			), array(
@@ -279,6 +286,7 @@ class WebhookService {
 		$this->mark_delivery_failed( $delivery, $response_body, $response_code );
 		
 		$this->log_repo->add_log( 'warning', 'Webhook', sprintf(
+			/* translators: %d: HTTP response status code */
 			__( 'Webhook returned non-success status: %d', 'certificate-manager' ),
 			$response_code
 		), array(
@@ -403,7 +411,9 @@ class WebhookService {
 		$result = array(
 			'success' => $success,
 			'status_code' => $status_code,
-			'message' => is_wp_error( $response ) ? $response->get_error_message() : ( $success ? __( 'Webhook test successful', 'certificate-manager' ) : sprintf( __( 'Webhook returned HTTP %d.', 'certificate-manager' ), $status_code ) ),
+			'message' => is_wp_error( $response ) ? $response->get_error_message() : ( $success ? __( 'Webhook test successful', 'certificate-manager' ) :
+			/* translators: %d: HTTP status code returned */
+			sprintf( __( 'Webhook returned HTTP %d.', 'certificate-manager' ), $status_code ) ),
 			'response_body' => is_wp_error( $response ) ? '' : wp_remote_retrieve_body( $response ),
 		);
 		

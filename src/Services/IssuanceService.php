@@ -263,6 +263,7 @@ class IssuanceService {
 			
 			if ( $var['is_required'] && empty( $value ) ) {
 				$errors[] = sprintf(
+					/* translators: %s: field label */
 					__( '%s is required', 'certificate-manager' ),
 					$var['variable_label']
 				);
@@ -273,6 +274,7 @@ class IssuanceService {
 				$field_type = $var['field_type'];
 				if ( ! $this->validate_field_value( $value, $field_type ) ) {
 					$errors[] = sprintf(
+						/* translators: %s: field label */
 						__( '%s is invalid', 'certificate-manager' ),
 						$var['variable_label']
 					);
@@ -281,6 +283,7 @@ class IssuanceService {
 					$options = is_array( $options ) ? array_map( 'absint', $options ) : array();
 					if ( $options && ! in_array( absint( $value ), $options, true ) ) {
 						$errors[] = sprintf(
+							/* translators: %s: field label */
 							__( '%s must use one of the approved images', 'certificate-manager' ),
 							$var['variable_label']
 						);
@@ -424,9 +427,9 @@ class IssuanceService {
 		
 		// Replace tokens
 		$replacements = array(
-			'{year}' => date( 'Y', $now ),
-			'{month}' => date( 'm', $now ),
-			'{day}' => date( 'd', $now ),
+			'{year}' => gmdate( 'Y', $now ),
+			'{month}' => gmdate( 'm', $now ),
+			'{day}' => gmdate( 'd', $now ),
 			'{seq}' => str_pad( (string) $value, $padding, '0', STR_PAD_LEFT ),
 			'{seq_unpadded}' => (string) $value,
 			'{sequence}' => $sequence['name'],
@@ -446,7 +449,7 @@ class IssuanceService {
 		}
 		
 		// Fallback UUID generation
-		$chars = md5( uniqid( (string) mt_rand(), true ) );
+		$chars = md5( uniqid( (string) wp_rand(), true ) );
 		$uuid = substr( $chars, 0, 8 ) . '-';
 		$uuid .= substr( $chars, 8, 4 ) . '-';
 		$uuid .= substr( $chars, 12, 4 ) . '-';

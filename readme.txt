@@ -1,9 +1,9 @@
 === Certificate Manager ===
 Contributors: cookieapps
-Tags: certificates, verification, qr, pdf, api, csv
+Tags: certificates, verification, qr code, pdf, certificate manager
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.6
+Tested up to: 7.1
 Stable tag: 1.4.3
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
