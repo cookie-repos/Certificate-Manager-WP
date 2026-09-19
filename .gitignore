@@ -1,0 +1,43 @@
+# Build outputs
+dist/
+*.zip
+*.sha256
+
+# Development files
+*.log
+*.bak
+*~
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# IDE/Editor files
+.idea/
+.vscode/
+*.sublime-*
+*.code-workspace
+
+# Node.js (if ever used for assets)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# PHPUnit cache
+.phpunit.cache/
+.phpunit.result.cache
+
+# Composer dev dependencies (we keep vendor/ for mPDF)
+# vendor/ is kept because it contains bundled dependencies
+
+# Test coverage
+coverage/
+*.coverage
+clover.xml
+
+# Environment files
+.env
+.env.local
+.env.*.local

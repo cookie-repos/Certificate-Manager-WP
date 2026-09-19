@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="src/Tests/bootstrap.php"
+    colors="true"
+    verbose="true"
+    testdox="true"
+    cacheResultFile=".phpunit.cache/test-results"
+>
+    <testsuites>
+        <testsuite name="Certificate Manager Test Suite">
+            <directory suffix="Test.php">./src/Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+        <exclude>
+            <directory>./src/Tests</directory>
+            <directory>./src/Assets</directory>
+            <file>./src/bootstrap.php</file>
+        </exclude>
+    </coverage>
+
+    <php>
+        <const name="WP_DEBUG" value="true" />
+        <const name="ABSPATH" value="./" />
+    </php>
+</phpunit>

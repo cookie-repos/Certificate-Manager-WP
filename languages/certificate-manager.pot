@@ -1,0 +1,375 @@
+# Certificate Manager Translation Template
+# Copyright (C) 2025 Certificate Manager Team
+# This file is distributed under the GPL2.
+msgid ""
+msgstr ""
+"Project-Id-Version: Certificate Manager 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/cert-manager/certificate-manager/issues\n"
+"POT-Creation-Date: 2025-09-13 00:00:00+00:00\n"
+"PO-Revision-Date: 2025-09-13 00:00:00+00:00\n"
+"Last-Translator: Certificate Manager Team <support@cert-manager.local>\n"
+"Language-Team: Certificate Manager Team <support@cert-manager.local>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_US\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: __;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;_nx_noop:1,2,3c;esc_html__;esc_html_e;esc_html_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Poedit-SearchPathExcluded-1: node_modules\n"
+"X-Poedit-SearchPathExcluded-2: vendor\n"
+"X-Poedit-SearchPathExcluded-3: tests\n"
+
+#: certificate-manager.php:155
+msgid "Certificate Manager requires PHP version %s or later. Please upgrade PHP or contact your hosting provider."
+msgstr ""
+
+#: certificate-manager.php:167
+msgid "Certificate Manager requires WordPress 6.0 or later. Please upgrade WordPress."
+msgstr ""
+
+#: src/Core/Settings.php:138
+msgid "Your Certificate is Ready"
+msgstr ""
+
+#: src/Core/Settings.php:139
+msgid "Hello {{recipient_name}},"
+msgstr ""
+
+#: src/Core/Settings.php:140
+msgid "Your certificate has been issued."
+msgstr ""
+
+#: src/Core/Capabilities.php:55
+msgid "View Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:58
+msgid "Issue Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:61
+msgid "Edit Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:64
+msgid "Revoke Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:67
+msgid "Reinstate Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:70
+msgid "Replace Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:73
+msgid "Delete Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:76
+msgid "Export Certificates"
+msgstr ""
+
+#: src/Core/Capabilities.php:79
+msgid "View Templates"
+msgstr ""
+
+#: src/Core/Capabilities.php:82
+msgid "Edit Templates"
+msgstr ""
+
+#: src/Core/Capabilities.php:85
+msgid "Delete Templates"
+msgstr ""
+
+#: src/Core/Capabilities.php:88
+msgid "Publish Templates"
+msgstr ""
+
+#: src/Core/Capabilities.php:91
+msgid "Manage Templates"
+msgstr ""
+
+#: src/Core/Capabilities.php:94
+msgid "Manage Variables"
+msgstr ""
+
+#: src/Core/Capabilities.php:97
+msgid "Manage Integrations"
+msgstr ""
+
+#: src/Core/Capabilities.php:100
+msgid "Manage Settings"
+msgstr ""
+
+#: src/Core/Capabilities.php:122
+msgid "Certificate Manager"
+msgstr ""
+
+#: src/Services/IssuanceService.php:227
+msgid "Invalid or archived template"
+msgstr ""
+
+#: src/Services/IssuanceService.php:231
+msgid "Template is not published"
+msgstr ""
+
+#: src/Services/IssuanceService.php:241
+msgid "Validation failed"
+msgstr ""
+
+#: src/Services/IssuanceService.php:247
+msgid "Field validation failed"
+msgstr ""
+
+#: src/Services/IssuanceService.php:262
+msgid "Template ID is required"
+msgstr ""
+
+#: src/Services/IssuanceService.php:266
+msgid "Recipient name is required"
+msgstr ""
+
+#: src/Services/IssuanceService.php:286
+msgid "%s is required"
+msgstr ""
+
+#: src/Services/IssuanceService.php:292
+msgid "%s is invalid"
+msgstr ""
+
+#: src/Services/IssuanceService.php:310
+msgid "Certificate sequence not found"
+msgstr ""
+
+#: src/Services/IssuanceService.php:338
+msgid "Failed to create certificate"
+msgstr ""
+
+#: src/Services/IssuanceService.php:450
+msgid "Certificate not found"
+msgstr ""
+
+#: src/Services/IssuanceService.php:478
+msgid "Invalid status"
+msgstr ""
+
+#: src/Services/IssuanceService.php:507
+msgid "Certificate is not revoked"
+msgstr ""
+
+#: src/Services/IssuanceService.php:539
+msgid "Circular replacement detected"
+msgstr ""
+
+#: src/Services/IssuanceService.php:573
+msgid "Certificate is not in trash"
+msgstr ""
+
+#: src/Services/IssuanceService.php:710
+msgid "Scheduled job not found"
+msgstr ""
+
+#: src/Services/IssuanceService.php:715
+msgid "Invalid job arguments"
+msgstr ""
+
+#: src/Services/RenderingService.php:103
+msgid "mPDF library not found. Please install it."
+msgstr ""
+
+#: src/Services/RenderingService.php:147
+msgid "PDF not found"
+msgstr ""
+
+#: src/Services/VerificationService.php:75
+msgid "Invalid or expired download token"
+msgstr ""
+
+#: src/Services/VerificationService.php:121
+msgid "Certificate Number"
+msgstr ""
+
+#: src/Services/VerificationService.php:125
+msgid "Issue Date"
+msgstr ""
+
+#: src/Services/VerificationService.php:129
+msgid "Expiry Date"
+msgstr ""
+
+#: src/Services/VerificationService.php:133
+msgid "Recipient Name"
+msgstr ""
+
+#: src/Services/QRService.php:179
+msgid "Data exceeds maximum QR code capacity (%d characters)"
+msgstr ""
+
+#: src/Services/QRService.php:184
+msgid "QR code size is small and may be difficult to scan"
+msgstr ""
+
+#: src/Services/QRService.php:189
+msgid "Logo in center of QR code may reduce scanability"
+msgstr ""
+
+#: src/Services/QRService.php:194
+msgid "Low contrast between QR code and background"
+msgstr ""
+
+#: src/Services/QRService.php:214
+msgid "Standard"
+msgstr ""
+
+#: src/Services/QRService.php:215
+msgid "Standard QR code with square modules"
+msgstr ""
+
+#: src/Services/QRService.php:219
+msgid "Rounded"
+msgstr ""
+
+#: src/Services/QRService.php:220
+msgid "QR code with rounded modules for a softer look"
+msgstr ""
+
+#: src/Services/QRService.php:224
+msgid "Minimal"
+msgstr ""
+
+#: src/Services/QRService.php:225
+msgid "Minimal QR code with simple design"
+msgstr ""
+
+#: src/Services/QRService.php:229
+msgid "Branded"
+msgstr ""
+
+#: src/Services/QRService.php:230
+msgid "Professional QR code with optional logo center"
+msgstr ""
+
+#: src/Services/EmailService.php:111
+msgid "Certificate email sent successfully"
+msgstr ""
+
+#: src/Services/EmailService.php:116
+msgid "Failed to send certificate email"
+msgstr ""
+
+#: src/Services/EmailService.php:128
+msgid "Recipient email not provided"
+msgstr ""
+
+#: src/Services/EmailService.php:137
+msgid "Invalid recipient email address"
+msgstr ""
+
+#: src/Services/EmailService.php:240
+msgid "Certificate has no expiry date"
+msgstr ""
+
+#: src/Services/EmailService.php:361
+msgid "Test Email - %s"
+msgstr ""
+
+#: src/Services/EmailService.php:362
+msgid "This is a test email from Certificate Manager."
+msgstr ""
+
+#: src/Services/EmailService.php:363
+msgid "If you received this, your email configuration is working correctly."
+msgstr ""
+
+#: src/Services/EmailService.php:381
+msgid "Test email sent to %s"
+msgstr ""
+
+#: src/Services/EmailService.php:386
+msgid "Failed to send test email to %s"
+msgstr ""
+
+#: src/Services/WebhookService.php:215
+msgid "Webhook delivery failed: %s"
+msgstr ""
+
+#: src/Services/WebhookService.php:255
+msgid "Webhook delivered successfully (status %d)"
+msgstr ""
+
+#: src/Services/WebhookService.php:264
+msgid "Webhook returned non-success status: %d"
+msgstr ""
+
+#: src/Services/WebhookService.php:358
+msgid "Webhook test successful"
+msgstr ""
+
+#: src/API/RESTController.php:569
+msgid "template_id is required"
+msgstr ""
+
+#: src/API/RESTController.php:574
+msgid "recipient_name is required"
+msgstr ""
+
+#: src/API/RESTController.php:597
+msgid "Template not found"
+msgstr ""
+
+#: src/API/RESTController.php:604
+msgid "API issuance not enabled for this template"
+msgstr ""
+
+#: src/API/RESTController.php:621
+msgid "replacement_id is required"
+msgstr ""
+
+#: src/API/RESTController.php:636
+msgid "name is required"
+msgstr ""
+
+#: src/API/RESTController.php:657
+msgid "webhook_id is required"
+msgstr ""
+
+#: src/API/RESTController.php:664
+msgid "Webhook not found"
+msgstr ""
+
+#: src/API/RESTController.php:707
+msgid "Issue a new certificate"
+msgstr ""
+
+#: src/API/RESTController.php:713
+msgid "Get certificate details"
+msgstr ""
+
+#: src/API/RESTController.php:718
+msgid "Update certificate"
+msgstr ""
+
+#: src/API/RESTController.php:723
+msgid "Revoke certificate"
+msgstr ""
+
+#: src/API/RESTController.php:728
+msgid "Replace certificate"
+msgstr ""
+
+#: src/API/RESTController.php:733
+msgid "Get template info and API examples"
+msgstr ""
+
+#: src/API/RESTController.php:932
+msgid "%s is required"
+msgstr ""
+
+#: src/API/RESTController.php:938
+msgid "%s is invalid"
+msgstr ""

@@ -1,0 +1,9 @@
+# Minimal OpenSSL configuration used only when PHP needs an explicit config
+# file to create the Certificate Manager RSA signing key.
+
+[ req ]
+default_bits = 2048
+default_md = sha256
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]
