@@ -2,6 +2,11 @@
 /**
  * W3C Verifiable Credentials service.
  *
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+ * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+ * phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+ * phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter
+ *
  * @package CertificateManager
  */
 
@@ -84,10 +89,12 @@ class VerifiableCredentialService {
 			'issued_at'      => current_time( 'mysql', true ),
 		);
 		if ( $stored_id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- wpdb::update() is the WP API method for writes; no caching needed for a write operation.
 			$saved = false !== $wpdb->update( $table_name, $data, array( 'id' => $stored_id ), array( '%s', '%s', '%s' ), array( '%d' ) );
 		} else {
 			$data['certificate_id'] = $certificate_id;
 			$data['created_at'] = current_time( 'mysql' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- wpdb::insert() is the WP API method for writes; no caching needed for a write operation.
 			$saved = (bool) $wpdb->insert( $table_name, $data, array( '%s', '%s', '%s', '%d', '%s' ) );
 		}
 

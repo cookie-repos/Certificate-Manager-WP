@@ -1,7 +1,4 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
 /**
  * Tests for IssuanceService
  *
@@ -9,6 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 
 namespace CertificateManager\Tests\Services;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use CertificateManager\Services\IssuanceService;

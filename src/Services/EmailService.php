@@ -403,6 +403,7 @@ class EmailService {
 			) );
 		} else {
 			$this->log( 'error', sprintf(
+				/* translators: %s: recipient email address */
 				__( 'Failed to send test email to %s', 'certificate-manager' ),
 				$to
 			) );

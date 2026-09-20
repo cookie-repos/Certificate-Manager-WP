@@ -193,7 +193,7 @@ class CSVService {
 			}
 		}
 		
-		fclose( $file );
+		fclose( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing CSV file opened for import.
 		
 		return $results;
 	}

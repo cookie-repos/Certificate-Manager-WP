@@ -83,9 +83,11 @@ class VariablesAdmin {
 		$variable_id = isset( $_POST['variable_id'] ) ? intval( $_POST['variable_id'] ) : 0;
 		$name = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
 		$key = sanitize_text_field( wp_unslash( $_POST['key'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_kses_post_deep sanitizes each array value; scalar values pass through wp_kses_post.
 		$value = wp_kses_post_deep( wp_unslash( $_POST['value'] ?? '' ) );
 		$field_type = sanitize_key( $_POST['field_type'] ?? 'text' );
 		$allowed_field_types = array( 'text', 'textarea', 'email', 'number', 'date', 'url', 'image' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON-decoded then cast to absint array below.
 		$field_options = json_decode( wp_unslash( $_POST['field_options'] ?? '[]' ), true );
 		$field_options = is_array( $field_options ) ? $field_options : array();
 		if ( ! in_array( $field_type, $allowed_field_types, true ) ) {
@@ -134,7 +136,7 @@ class VariablesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$variable_id = intval( $_POST['variable_id'] );
+		$variable_id = isset( $_POST['variable_id'] ) ? intval( $_POST['variable_id'] ) : 0;
 		
 		if ( $this->variable_repo->delete_variable( $variable_id ) ) {
 			wp_send_json_success();
@@ -155,7 +157,7 @@ class VariablesAdmin {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$variable_id = intval( $_POST['variable_id'] );
+		$variable_id = isset( $_POST['variable_id'] ) ? intval( $_POST['variable_id'] ) : 0;
 		$variable = $this->variable_repo->get_variable( $variable_id );
 		
 		if ( ! $variable ) {

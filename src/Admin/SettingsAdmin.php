@@ -51,7 +51,7 @@ class SettingsAdmin {
 	}
 
 	public function enqueue_scripts( $hook ) {
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page check, no form data processed.
 		if ( 'cm_settings' !== $page ) {
 			return;
 		}
@@ -68,7 +68,7 @@ class SettingsAdmin {
 	}
 
 	public function render_pixabay_setup_notice() {
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page check, no form data processed.
 		if ( 0 !== strpos( $page, 'cm_' ) || ! current_user_can( 'cm_manage_settings' ) || '' !== trim( (string) $this->settings->get( 'pixabay_api_key', '' ) ) ) {
 			return;
 		}
@@ -281,7 +281,8 @@ class SettingsAdmin {
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Certificate email', 'certificate-manager' ); ?></th>
-						<td><label for="cm-default-email-subject"><?php esc_html_e( 'Subject', 'certificate-manager' ); ?></label><br><input class="regular-text" id="cm-default-email-subject" type="text" name="certificate_manager_settings[default_email_subject]" value="<?php echo esc_attr( ['default_email_subject'] ?? esc_attr__( 'Your Certificate is Ready', 'certificate-manager' ) ); ?>"><p><label for="cm-default-email-body"><?php esc_html_e( 'Message', 'certificate-manager' ); ?></label><br><textarea class="large-text" rows="7" id="cm-default-email-body" name="certificate_manager_settings[default_email_body]"><?php echo esc_textarea( $settings['default_email_body'] ?? '' ); ?></textarea></p><p class="description"><?php esc_html_e( 'Useful placeholders: {{recipient_name}}, {{certificate_number}}, {{issue_date}}, {{expiry_date}}, {{verification_url}}, {{site_name}}. WordPress sends this through your site’s normal mail configuration.', 'certificate-manager' ); ?></p></td>
+						<?php $default_email_subject = $settings['default_email_subject'] ?? __( 'Your Certificate is Ready', 'certificate-manager' ); ?>
+						<td><label for="cm-default-email-subject"><?php esc_html_e( 'Subject', 'certificate-manager' ); ?></label><br><input class="regular-text" id="cm-default-email-subject" type="text" name="certificate_manager_settings[default_email_subject]" value="<?php echo esc_attr( $default_email_subject ); ?>"><p><label for="cm-default-email-body"><?php esc_html_e( 'Message', 'certificate-manager' ); ?></label><br><textarea class="large-text" rows="7" id="cm-default-email-body" name="certificate_manager_settings[default_email_body]"><?php echo esc_textarea( $settings['default_email_body'] ?? '' ); ?></textarea></p><p class="description"><?php esc_html_e( 'Useful placeholders: {{recipient_name}}, {{certificate_number}}, {{issue_date}}, {{expiry_date}}, {{verification_url}}, {{site_name}}. WordPress sends this through your site’s normal mail configuration.', 'certificate-manager' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Verification page', 'certificate-manager' ); ?></th>
@@ -342,7 +343,7 @@ class SettingsAdmin {
 		$url = esc_url_raw( wp_unslash( $_POST['url'] ?? '' ) );
 		$event = sanitize_key( wp_unslash( $_POST['event'] ?? 'certificate_issued' ) );
 		$event = in_array( $event, array( 'certificate_issued', 'certificate_request_valid', 'wallet_link_requested' ), true ) ? $event : 'certificate_issued';
-		$payload_fields = $this->sanitize_webhook_payload_fields( $_POST['payload_fields'] ?? array() );
+		$payload_fields = $this->sanitize_webhook_payload_fields( $_POST['payload_fields'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_unslash and sanitize_key applied inside sanitize_webhook_payload_fields().
 		if ( '' === $name || ! wp_http_validate_url( $url ) || 'https' !== strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ) ) { $this->redirect_to_webhooks(); }
 		$this->webhook_repo->create( array( 'name' => $name, 'url' => $url, 'events' => array( $event ), 'payload_fields' => $payload_fields, 'enabled' => 1 ) );
 		$this->redirect_to_webhooks();
@@ -352,6 +353,7 @@ class SettingsAdmin {
 		if ( ! current_user_can( 'manage_options' ) || ! current_user_can( 'cm_manage_settings' ) ) { wp_die( esc_html__( 'Permission denied.', 'certificate-manager' ), '', array( 'response' => 403 ) ); }
 		$webhook_id = absint( $_POST['webhook_id'] ?? 0 );
 		check_admin_referer( 'cm_update_issue_webhook_payload_' . $webhook_id );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_unslash and sanitize_key applied inside sanitize_webhook_payload_fields().
 		$this->webhook_repo->update( $webhook_id, array( 'payload_fields' => $this->sanitize_webhook_payload_fields( $_POST['payload_fields'] ?? array() ) ) );
 		$this->redirect_to_webhooks();
 	}

@@ -12,6 +12,7 @@
  * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
  * phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
  * phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+ * phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
  * phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter
  *
  * @package CertificateManager

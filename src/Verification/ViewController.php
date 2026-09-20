@@ -116,11 +116,12 @@ class ViewController {
 		if ( ! $this->is_canonical_verification_request() && ! $this->is_verification_page() ) {
 			return;
 		}
-		if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && 'cm_request_certificates' === sanitize_key( wp_unslash( $_POST['cm_action'] ?? '' ) ) ) {
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+		if ( 'POST' === $request_method && 'cm_request_certificates' === sanitize_key( wp_unslash( $_POST['cm_action'] ?? '' ) ) ) {
 			$this->handle_certificate_request();
 			return;
 		}
-		if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && 'cm_request_wallet_link' === sanitize_key( wp_unslash( $_POST['cm_action'] ?? '' ) ) ) {
+		if ( 'POST' === $request_method && 'cm_request_wallet_link' === sanitize_key( wp_unslash( $_POST['cm_action'] ?? '' ) ) ) {
 			$this->handle_wallet_link_request();
 			return;
 		}
@@ -191,7 +192,7 @@ class ViewController {
 		if ( is_wp_error( $credential ) ) {
 			$status = 'certificate_not_found' === $credential->get_error_code() ? 404 : 503;
 			status_header( $status );
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional server-side log for failed credential download.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $status is a hardcoded integer (404 or 503), not user input.
 			wp_die( esc_html( $credential->get_error_message() ), esc_html__( 'Signed credential unavailable', 'certificate-manager' ), array( 'response' => $status ) );
 		}
 		status_header( 200 );
@@ -298,7 +299,7 @@ class ViewController {
 			if ( $email ) {
 				global $wpdb;
 				$table_name = $wpdb->prefix . 'certificate_manager_certificates';
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WP-prefixed; no caching for public verification endpoint.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is WP-prefixed; no caching for public verification endpoint.
 				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, certificate_number, verification_token FROM {$table_name} WHERE recipient_email = %s AND status = %s", $email, 'active' ), ARRAY_A );
 				if ( $rows ) {
 					$certificates = array_map( function ( $certificate ) {

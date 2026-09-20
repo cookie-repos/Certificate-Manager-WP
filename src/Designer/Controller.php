@@ -60,7 +60,8 @@ class Controller {
 			wp_send_json_error( array( 'message' => __( 'Security check failed', 'certificate-manager' ) ), 400 );
 		}
 		
-		$template_id = intval( $_POST['template_id'] );
+		$template_id = isset( $_POST['template_id'] ) ? intval( $_POST['template_id'] ) : 0;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_kses_post_deep sanitizes each array value.
 		$variables = isset( $_POST['variables'] ) ? wp_kses_post_deep( wp_unslash( $_POST['variables'] ) ) : array();
 		
 		$preview_html = $this->designer_service->render_preview( $template_id, $variables );

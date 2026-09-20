@@ -323,7 +323,7 @@ class CertificatesAdmin {
 	 * @param string $hook Current hook.
 	 */
 	public function enqueue_scripts( $hook ) {
-		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page check, no form data processed.
 		if ( 'cm_certificates' !== $page ) {
 			return;
 		}
@@ -361,6 +361,7 @@ class CertificatesAdmin {
 		$recipient_name = sanitize_text_field( wp_unslash( $_POST['recipient_name'] ?? '' ) );
 		$recipient_email = sanitize_email( wp_unslash( $_POST['recipient_email'] ?? '' ) );
 		$variables = array();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each element sanitized individually below via sanitize_key/sanitize_textarea_field.
 		if ( isset( $_POST['variables'] ) && is_array( $_POST['variables'] ) ) {
 			foreach ( wp_unslash( $_POST['variables'] ) as $key => $value ) {
 				if ( is_scalar( $value ) ) {
@@ -627,7 +628,9 @@ class CertificatesAdmin {
 			</form>
 			<form id="cm-import-certificates-form" class="cm-issue-mode" data-issue-mode-panel="csv" enctype="multipart/form-data" hidden>
 				<div class="cm-form-grid"><label><?php esc_html_e( 'Template', 'certificate-manager' ); ?><select name="template_id" id="cm-import-template" required><option value=""><?php esc_html_e( 'Select a template', 'certificate-manager' ); ?></option><?php foreach ( $templates as $template ) : ?><option value="<?php echo esc_attr( $template['id'] ); ?>"><?php echo esc_html( $template['title'] ); ?></option><?php endforeach; ?></select></label><label><?php esc_html_e( 'Completed CSV file', 'certificate-manager' ); ?><input type="file" name="csv_file" accept=".csv,text/csv" required></label></div>
-				<div class="cm-csv-import-help"><p><?php esc_html_e( 'Download the layout after choosing a template. Keep the first row of column names unchanged, then add one certificate per row. Use YYYY-MM-DD for issue dates and yes/no for expiry_enabled.', 'certificate-manager' ); ?></p><a class="button cm-download-template-csv" href="#" aria-disabled="true"><?php esc_html_e( 'Download template CSV', 'certificate-manager' ); ?></a><?php foreach ( $templates as $template ) : ?><p class="description cm-csv-template-fields" data-template-id="<?php echo esc_attr( $template['id'] ); ?>" hidden><?php printf( esc_html__( 'Columns: %s', 'certificate-manager' ), esc_html( implode( ', ', $this->get_template_csv_headers( $template ) ) ) ); ?></p><?php endforeach; ?></div>
+				<div class="cm-csv-import-help"><p><?php esc_html_e( 'Download the layout after choosing a template. Keep the first row of column names unchanged, then add one certificate per row. Use YYYY-MM-DD for issue dates and yes/no for expiry_enabled.', 'certificate-manager' ); ?></p><a class="button cm-download-template-csv" href="#" aria-disabled="true"><?php esc_html_e( 'Download template CSV', 'certificate-manager' ); ?></a><?php foreach ( $templates as $template ) : ?><p class="description cm-csv-template-fields" data-template-id="<?php echo esc_attr( $template['id'] ); ?>" hidden><?php
+					/* translators: %s: comma-separated list of CSV column names */
+					printf( esc_html__( 'Columns: %s', 'certificate-manager' ), esc_html( implode( ', ', $this->get_template_csv_headers( $template ) ) ) ); ?></p><?php endforeach; ?></div>
 				<div class="cm-form-actions"><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Import and issue certificates', 'certificate-manager' ); ?></button><span class="cm-csv-import-status" role="status"></span></div>
 			</form>
 		</section>
