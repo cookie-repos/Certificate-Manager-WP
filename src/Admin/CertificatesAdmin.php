@@ -361,8 +361,8 @@ class CertificatesAdmin {
 		$recipient_name = sanitize_text_field( wp_unslash( $_POST['recipient_name'] ?? '' ) );
 		$recipient_email = sanitize_email( wp_unslash( $_POST['recipient_email'] ?? '' ) );
 		$variables = array();
-		if ( isset( $_POST['variables'] ) && is_array( $_POST['variables'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each element sanitized individually below via sanitize_key/sanitize_textarea_field.
-			foreach ( wp_unslash( $_POST['variables'] ) as $key => $value ) {
+		if ( isset( $_POST['variables'] ) && is_array( $_POST['variables'] ) ) {
+			foreach ( wp_unslash( $_POST['variables'] ) as $key => $value ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each element sanitized individually below via sanitize_key/sanitize_textarea_field.
 				if ( is_scalar( $value ) ) {
 					$variables[ sanitize_key( $key ) ] = sanitize_textarea_field( (string) $value );
 				}
