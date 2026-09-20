@@ -290,6 +290,7 @@ class SettingsAdmin {
 							<label for="cm-verification-page-id"><?php esc_html_e( 'Use this WordPress page for certificate links and QR codes', 'certificate-manager' ); ?></label>
 							<?php
 							$verification_page_option_label = esc_html__( 'Select a verification page', 'certificate-manager' );
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $verification_page_option_label is already escaped via esc_html__() above; wp_dropdown_pages() echoes it as option text.
 							wp_dropdown_pages( array( 'name' => 'certificate_manager_settings[verification_page_id]', 'id' => 'cm-verification-page-id', 'selected' => absint( $settings['verification_page_id'] ?? 0 ), 'show_option_none' => $verification_page_option_label, 'option_none_value' => '0' ) );
 							?>
 							<p class="description"><?php esc_html_e( 'The selected page must contain the [certificate_verification] shortcode. QR codes always use Certificate Manager’s stable link first, then redirect here.', 'certificate-manager' ); ?></p>
