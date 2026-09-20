@@ -281,7 +281,7 @@ class SettingsAdmin {
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Certificate email', 'certificate-manager' ); ?></th>
-						<?php $default_email_subject = $settings['default_email_subject'] ?? __( 'Your Certificate is Ready', 'certificate-manager' ); ?>
+						<?php $default_email_subject = isset( $settings['default_email_subject'] ) ? sanitize_text_field( $settings['default_email_subject'] ) : esc_attr__( 'Your Certificate is Ready', 'certificate-manager' ); ?>
 						<td><label for="cm-default-email-subject"><?php esc_html_e( 'Subject', 'certificate-manager' ); ?></label><br><input class="regular-text" id="cm-default-email-subject" type="text" name="certificate_manager_settings[default_email_subject]" value="<?php echo esc_attr( $default_email_subject ); ?>"><p><label for="cm-default-email-body"><?php esc_html_e( 'Message', 'certificate-manager' ); ?></label><br><textarea class="large-text" rows="7" id="cm-default-email-body" name="certificate_manager_settings[default_email_body]"><?php echo esc_textarea( $settings['default_email_body'] ?? '' ); ?></textarea></p><p class="description"><?php esc_html_e( 'Useful placeholders: {{recipient_name}}, {{certificate_number}}, {{issue_date}}, {{expiry_date}}, {{verification_url}}, {{site_name}}. WordPress sends this through your site’s normal mail configuration.', 'certificate-manager' ); ?></p></td>
 					</tr>
 					<tr>
